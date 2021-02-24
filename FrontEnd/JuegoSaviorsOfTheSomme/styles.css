@@ -1,13 +1,15 @@
 *{
     position: relative;
-    color: #333;
+    color: rgb(179, 46, 46);
 }
 
-body {
-margin: 0;
-overflow: hidden;
-background-color: black;
-    }
+	body {
+		margin: 0;
+		overflow: hidden;
+		background-color: #EFE0BB;
+		background-image: url("./assets/images/background.png");
+
+	}
 		
 	#phaser-app {
 		margin: 0 auto;

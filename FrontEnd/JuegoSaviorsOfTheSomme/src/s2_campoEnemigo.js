@@ -8,12 +8,11 @@ export default class s2_campoEnemigo extends Phaser.Scene {
     create() {
         let graphics = this.add.graphics();
 
-        graphics.fillStyle(0xff3399, 1);
+        graphics.fillStyle(0xb5423c, 1);
 
-        graphics.fillRect(100, 200, 600, 300);
-        graphics.fillRect(200, 100, 100, 100);
+        graphics.fillRect(global_var_s2_x, global_var_s2_y, global_var_s2_w, global_var_s2_h);
 
-        this.add.text(220, 110, "2", { font: "96px Courier", fill: "#287233" });
+        this.add.text(global_var_s2_x, global_var_s2_y, "s2_campoEnemigo", { font: "16px Courier", fill: "#ffffff" });
 
     }
     update(time, delta) {

@@ -8,12 +8,11 @@ export default class s1_miCampo extends Phaser.Scene {
     create() {
         let graphics = this.add.graphics();
 
-        graphics.fillStyle(0xff3300, 1);
+        graphics.fillStyle(0x4048bd, 1);
 
-        graphics.fillRect(100, 200, 600, 300);
-        graphics.fillRect(100, 100, 100, 100);
+        graphics.fillRect(global_var_s1_x, global_var_s1_y, global_var_s1_w, global_var_s1_h);
 
-        this.add.text(120, 110, "1", { font: "96px Courier", fill: "#81d8d0" });
+        this.add.text(global_var_s1_x, global_var_s1_y, "s1_miCampo", { font: "16px Courier", fill: "#81d8d0" });
 
     }
     update(time, delta) {
