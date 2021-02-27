@@ -32,7 +32,7 @@ import s2_campoEnemigo from './s2_campoEnemigo.js';
 import s6_lineaFrontera from './s6_lineaFrontera.js'; 
 import s3_vistaLateral from './s3_vistaLateral.js';
 import s4_tableroInfo from './s4_tableroInfo.js';
-import s5_menu from './s5_menu.js';
+import s5_menu from './s5_menu.js'; 
 import s7_campoBatalla from './s7_campoBatalla.js';
 
 
