@@ -36,23 +36,26 @@ import s5_menu from './s5_menu.js';
 import s7_campoBatalla from './s7_campoBatalla.js';
 
 
-juego_var_nav_width = window.innerWidth
+/* juego_var_nav_width = window.innerWidth
 || document.documentElement.clientWidth
 || document.body.clientWidth;
 
 juego_var_nav_height = window.innerHeight
 || document.documentElement.clientHeight
 || document.body.clientHeight;
- 
-/* alert(juego_var_nav_width   +"  x   "+juego_var_nav_height); */
+  */
+/* alert(juego_var_nav_width   +"  x   "+juego_var_nav_height);
+ */
+/* juego_var_nav_width = 1000;
+juego_var_nav_height = 600; */
 
 const config = {
 	transparent: true,
 	backgroundColor: 'rgba(0, 0, 0, 0)',
     type: Phaser.AUTO,
     parent: 'phaser-app',
-    width: (juego_var_nav_width) - 20,
-    height: (juego_var_nav_height) - 20,   
+    width: juego_var_nav_width, //(juego_var_nav_width) - 20,
+    height: juego_var_nav_height, //(juego_var_nav_height) - 20,   
     scene: [s7_campoBatalla], //s3_vistaLateral, s4_tableroInfo, s5_menu
 	physics: {
 		default: "arcade",
