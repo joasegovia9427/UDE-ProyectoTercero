@@ -73,9 +73,10 @@ var gfx;
 var snd_metralleta;
 var snd_impacto_metralleta;
 
+var avionActivaUltimaVX = 0;
+var avionActivaUTlimaVY = 0;
 
-
-
+var modificoDireccion = false;
 
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
 
@@ -208,6 +209,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
             graphics3.fillStyle(0x326ba8, 1);
             graphics3.fillRect(baseAliada_x, baseAliada_y, baseAliada_w ,baseAliada_h);
              */
+
+            ////AJUSTE POR MAL ORIGIN DE IMAGENES Y PARA OBTENER BIEN LAS COORDENADAS EN BASE A LA IMAGEN
+            baseAliada_x = baseAliada_x + (elemento_w/2); 
+            baseAliada_y = baseAliada_y + (elemento_w/2); 
+/*             baseAliada_w = ((elemento_w*3)+(elemento_espacio*2));//campoAliado_w*0.50; 
+            baseAliada_h = 100; */
            
             ////CREACION DE ARMAS
             /// agrego linea para usar en torreta
@@ -222,7 +229,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
             ////CREACION DE deposito_combustible
-            this.deposito_combustible = this.physics.add.image(baseAliada_x, baseAliada_y, 'deposito_combustible_negro').setDisplayOrigin(0, 0);
+            this.deposito_combustible = this.physics.add.image(baseAliada_x, baseAliada_y, 'deposito_combustible_negro');//.setDisplayOrigin(0, 0);
             this.deposito_combustible.setCollideWorldBounds(true);
             this.deposito_combustible.setBounce(0);
             /* var elemento_w = this.deposito_combustible.width;
@@ -230,7 +237,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             this.deposito_combustible.vida = 100;
        
             ////CREACION DE torreControl
-            this.torreControl = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro').setDisplayOrigin(0, 0);
+            this.torreControl = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
             this.torreControl.setCollideWorldBounds(true);
             this.torreControl.setBounce(0);
             this.torreControl.vida = 100;
@@ -245,13 +252,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
             this.torreControl.bullets_torre.physicsBodyType = Phaser.Physics.ARCADE;
 
             ////CREACION DE deposito_bombas
-            this.deposito_bombas = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro').setDisplayOrigin(0, 0);
+            this.deposito_bombas = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro');//.setDisplayOrigin(0, 0);
             this.deposito_bombas.setCollideWorldBounds(true);
             this.deposito_bombas.setBounce(0);
             this.deposito_bombas.vida = 100;
 
             ////CREACION DE pistaAviones
-            this.pistaAviones = this.physics.add.image( baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
+            this.pistaAviones = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), (baseAliada_y+(elemento_w/2)+(elemento_espacio*2)) , 'pistaAviones_negro');     /////    baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
             this.pistaAviones.setCollideWorldBounds(true);
             this.pistaAviones.setBounce(0);
  
@@ -411,17 +418,18 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.avionA_1.setBounce(0);
         this.avionA_1.scaleX=0.2;
         this.avionA_1.scaleY=0.2;
-        this.avionA_1.z = 0; 
+        this.avionA_1.z = 100; 
         this.avionA_1.vida = 100;
         this.avionA_1.rangoVision = rangoVisionAvion;
         this.avionA_1.angle = 0;
         this.avionA_1.tieneBomba = true;
         this.avionA_1.cantBombas = 1;
-        this.avionA_1.cantCombustible = 100;
+        this.avionA_1.cantCombustible = 10000;
+        this.avionA_1.unidadDeVelocidad = 0;
+        this.avionA_1.unidadDeConsumoCombustible = 0;
         this.avionA_1.isAvionEnCampoEnemigo = false;
         this.avionA_1.bando = "Aliado";
         this.avionA_1.HayEnemigo = false;
-        cantidadAvionesAliadas = arrayAvionesAliadas.push(this.avionA_1);
         this.avionA_1.lastFiredAvion = 0;
         this.avionA_1.bullets_avion = this.physics.add.group({
             classType: Bullet,
@@ -429,6 +437,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             runChildUpdate: true
         });
         this.avionA_1.bullets_avion.physicsBodyType = Phaser.Physics.ARCADE;
+        cantidadAvionesAliadas = arrayAvionesAliadas.push(this.avionA_1);
         // activo, velocidad, aceleracion
 
 
@@ -438,26 +447,28 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.avionE_1.setBounce(0);
         this.avionE_1.scaleX=0.2;
         this.avionE_1.scaleY=0.2;
-        this.avionE_1.z = 0; 
+        this.avionE_1.z = 100; 
         this.avionE_1.vida = 100;
         this.avionE_1.rangoVision = rangoVisionAvion;
         this.avionE_1.angle = 90;
         this.avionE_1.tieneBomba = true;
         this.avionE_1.cantBombas = 1;
-        this.avionE_1.cantCombustible = 100;
+        this.avionE_1.cantCombustible = 10000;
+        this.avionA_1.unidadDeVelocidad = 0;
+        this.avionA_1.unidadDeConsumoCombustible = 0;
         this.avionE_1.isAvionEnCampoEnemigo = false;
         this.avionE_1.bando = "Enemigo";
         this.avionE_1.HayEnemigo = false;
-        this.avionE_1.setVelocity(0,50);
         this.avionE_1.lastFiredAvion = 0;
-        cantidadAvionesAliadas = arrayAvionesEnemigas.push(this.avionE_1);
         this.avionE_1.bullets_avion = this.physics.add.group({
             classType: Bullet,
             maxSize: 5,
             runChildUpdate: true
         });
-        this.avionE_1.bullets_avion.physicsBodyType = Phaser.Physics.ARCADE;   
-    
+        this.avionE_1.bullets_avion.physicsBodyType = Phaser.Physics.ARCADE; 
+        this.avionE_1.setVelocity(0,10);
+        cantidadAvionesAliadas = arrayAvionesEnemigas.push(this.avionE_1);
+
         ////CREACION DE MASCARA
         spotlight = this.make.sprite({
             x: 0,
@@ -489,13 +500,22 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.left   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         this.up     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.down   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        
+        this.cambiarAlturaAvionBaja = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+        this.cambiarAlturaAvionMedia = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO);
+        this.cambiarAlturaAvionAlta = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+        
         this.disparoAvion = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
+
+
+
     
         //// CREACION DE COLISIONES Y SOLAPAMIENTOS
 
-        this.physics.add.collider(this.avionA_1, this.avionE_1, null, null, this);
-       
+
+        
+
 /*         this.physics.add.collider(this.artilleroA_1, this.deposito_bombas, artilleroOnCollide, null, this);
         this.physics.add.collider(this.artilleroA_1, this.deposito_combustible, artilleroOnCollide, null, this);
         this.physics.add.collider(this.artilleroA_1, this.torreControl, artilleroOnCollide, null, this);
@@ -515,6 +535,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         ///// CREACION DE TABLERO BASE
         tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '16px Courier', fill: '#00000' });
     
+
         sceneJuego = this;
     }////CIERRE CREATE
 
@@ -528,70 +549,77 @@ export default class s7_campoBatalla extends Phaser.Scene {
         ///// MOVIMIENTO DE AVION EN BASE A BOTONES
         ////LUEGO SACAR FISICAS PARA FUERA DEL IF DE BOTONES... ya que por mas que no muevas tu avion, tiene que recalcular en base al websockets los eventosasd
         
-        
+        modificoDireccion = false;
+
+        getUnidadDesplazamiento(this.avionA_1);
+
+
         if(this.right.isDown || this.left.isDown || this.up.isDown || this.down.isDown){
             var vX, vY;
             var diagonal=false;
             if(this.right.isDown) {
                 ultimaTeclaPresionada = "right";
-                this.avionA_1.x++;
+                this.avionA_1.x = this.avionA_1.x + this.avionA_1.unidadDeVelocidad;//++;
                 this.avionA_1.resetFlip();
                 if (this.down.isDown){
-                    // this.avionA_1.x++; 
-                    this.avionA_1.y++;
+                    // this.avionA_1.x = this.avionA_1.x + unidadDeVelocidad;//++; 
+                    this.avionA_1.y = this.avionA_1.y + this.avionA_1.unidadDeVelocidad;//++;
                     this.avionA_1.angle=45;
                     vX = 10;vY = 10;
                 }else{
                     if (this.up.isDown){
-                        // this.avionA_1.x++; 
-                        this.avionA_1.y--;
+                        // this.avionA_1.x = this.avionA_1.x + unidadDeVelocidad;//++; 
+                        this.avionA_1.y = this.avionA_1.y - this.avionA_1.unidadDeVelocidad;//--;
                         this.avionA_1.angle=-45;
                         vX = 10;vY = -10;
                     }else{this.avionA_1.angle=0;diagonal=true;vX = 10;vY = 0;}
                 ;}                
             } else if(this.left.isDown) {
                 ultimaTeclaPresionada = "left";
-                this.avionA_1.x--;
+                this.avionA_1.x = this.avionA_1.x - this.avionA_1.unidadDeVelocidad;//--;
                 this.avionA_1.resetFlip();
                 this.avionA_1.flipX=true;
                 if (this.down.isDown){
-                    // this.avionA_1.x--; 
-                    this.avionA_1.y++;
+                    // this.avionA_1.x = this.avionA_1.x - unidadDeVelocidad;//--; 
+                    this.avionA_1.y = this.avionA_1.y + this.avionA_1.unidadDeVelocidad;//++;
                     this.avionA_1.angle=-45;
                     vX = -10;vY = 10;
                 }else{
                     if (this.up.isDown){
-                        // this.avionA_1.x--; 
-                        this.avionA_1.y--;
+                        // this.avionA_1.x = this.avionA_1.x - unidadDeVelocidad;//--; 
+                        this.avionA_1.y = this.avionA_1.y - this.avionA_1.unidadDeVelocidad;//--;
                         this.avionA_1.angle=45;
                         vX = -10;vY = -10;
                     }else{this.avionA_1.angle=0;diagonal=true; vX = -10;vY = 0;}
                 ;}           
             } else if(this.up.isDown) {
                 ultimaTeclaPresionada = "up";
-                this.avionA_1.y--;
+                this.avionA_1.y = this.avionA_1.y - this.avionA_1.unidadDeVelocidad;//--;
                 this.avionA_1.resetFlip();
                 this.avionA_1.angle=-90;
                 vX = 0;
                 vY = -10;
             } else if(this.down.isDown) {
                 ultimaTeclaPresionada = "down";
-                this.avionA_1.y++;
+                this.avionA_1.y = this.avionA_1.y + this.avionA_1.unidadDeVelocidad;//++;
                 this.avionA_1.resetFlip();
                 this.avionA_1.angle=90;
                 vX = 0;
                 vY = 10;
             }
-            setVelocidadAvion(this.avionA_1, vX, vY);
             
+            setVelocidadAvion(this.avionA_1, vX, vY);
+            modificoDireccion = true;
         }
 
         //// Actualizacion de mascara en base a avionA_1 x y
         ////Nota: aunque el movimiento de la avion de saque para eventos de boton, esta actualizacion se tiene que hacer constantemente en el update debido a la velocidad del avion (incersia)
         spotlight.x = this.avionA_1.x;
-        spotlight.y = this.avionA_1.y;
+        spotlight.y = this.avionA_1.y+2;
 
 
+        ////descuento de combustible
+        setDescuentoCombustibleAvionUPDATE(1, this.avionA_1);
 
 
         /////---------FISICAS DE AVIONES y BALAS ENEMIGAS------
@@ -605,8 +633,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
   /*           'x: ' + this.avionA_1.body.speed,
             'y: ' + this.avionA_1.y, */
             'Altura: ' + this.avionA_1.z,
-            'Bomba: ' + true,
+            'Bomba: ' + this.avionA_1.tieneBomba,
             'Vida: ' + this.avionA_1.vida,
+            'Combustible: ' + this.avionA_1.cantCombustible,
         ]);
           //// ACTUALIZAR TEXTO DE TABLERO BASE:
           tableroBase.setText([
@@ -632,6 +661,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         }
 
 
+        this.avionA_activa = this.avionA_1;
+
 
 
     }////CIERRE UPDATE
@@ -639,11 +670,156 @@ export default class s7_campoBatalla extends Phaser.Scene {
     
 }////CIERRE CLASS
 
+
+window.addEventListener('keydown', escuchaDeKeyDownSwitch); 
+function escuchaDeKeyDownSwitch(event){
+    switch(event.keyCode) {
+        case Phaser.Input.Keyboard.KeyCodes.D:
+            
+          break;
+        case Phaser.Input.Keyboard.KeyCodes.A:
+            
+          break;
+        case Phaser.Input.Keyboard.KeyCodes.W:
+            
+            break;
+        case Phaser.Input.Keyboard.KeyCodes.S:
+            
+            break;
+        case Phaser.Input.Keyboard.KeyCodes.ONE:
+            evento_tecla_avionAltura0();
+          break;
+        case Phaser.Input.Keyboard.KeyCodes.TWO:
+            evento_tecla_avionAltura1();
+          break;
+        case Phaser.Input.Keyboard.KeyCodes.THREE:
+            evento_tecla_avionAltura2();
+            break;
+        case Phaser.Input.Keyboard.KeyCodes.SPACE:
+            
+            break;
+      }
+
+}
+
+function evento_tecla_avionAltura0(){
+
+    //IF el avion esta arriba de la pista de la base
+        //implmenetar transicion:: if era mas grande --> setTransicionScaleAumentar(this.pajaro,0.2,0.1);
+        
+        //// a medida que tengo una aviona activa, la guardo referencia y luego hago
+        sceneJuego.avionA_activa.z=0;
+        sceneJuego.avionA_activa.scaleX=0.1;
+        sceneJuego.avionA_activa.scaleY=0.1;
+
+    
+        ////se podria cambiar la sombra this.pajaroVision.setTexture("transparente");
+                
+        //recargar nafta si hay en el tanque de la base
+        //otras funciones como, si me quedan en mi panel 5 llaves, entonces tengo 5 reparaciones de vida
+    
+    /*
+    Si pajaro z en 100 entonces 200, bajo vel, incremento gasto de gasolina, incremento tamaño avion
+    si pajaro z es 200 entonces 100, incremento vel, descremento gasto de gasolina, decremento tamaño avion
+
+        this.pajaro.z = ;*/
+
+    ////Adentro resuelve cambios por altura y bomba
+    setVelocidadAvion(sceneJuego.avionA_activa, avionActivaUltimaVX, avionActivaUTlimaVY);
+    
+}
+
+function evento_tecla_avionAltura1(){
+    sceneJuego.avionA_activa.z=100;
+    sceneJuego.avionA_activa.scaleX=0.2;
+    sceneJuego.avionA_activa.scaleY=0.2;
+    
+    ////this.pajaroVision.setTexture("transparente");
+
+
+    ////Adentro resuelve cambios por altura y bomba
+    setVelocidadAvion(sceneJuego.avionA_activa, avionActivaUltimaVX, avionActivaUTlimaVY);
+    
+}
+
+function evento_tecla_avionAltura2(){
+    sceneJuego.avionA_activa.z=200;
+    sceneJuego.avionA_activa.scaleX=0.3;
+    sceneJuego.avionA_activa.scaleY=0.3;
+
+    ////this.pajaroVision.setTexture("opaca");
+     
+    ///this.pajaro2.mask = new Phaser.Display.Masks.BitmapMask(this, spotlightb);
+    ///this.piso.mask = new Phaser.Display.Masks.BitmapMask(this, spotlightb);
+    ///this.torreta.mask = new Phaser.Display.Masks.BitmapMask(this, spotlightb);
+    
+
+    ////Adentro resuelve cambios por altura y bomba
+    setVelocidadAvion(sceneJuego.avionA_activa, avionActivaUltimaVX, avionActivaUTlimaVY);
+    
+    
+}
+
 function setVelocidadAvion(avion, velX, velY){
-    if(avion.z == 100){//baja altura
+    if (avion.tieneBomba) {
+        velX = velX*0.80;
+        velY = velY*0.80;
+    } 
+    
+    if(avion.z <= 100){//baja altura
+        avionActivaUltimaVX = velX;
+        avionActivaUTlimaVY = velY;
         avion.setVelocity(velX,velY);
     }else{ //200 es altura
+        avionActivaUltimaVX = velX/2;
+        avionActivaUTlimaVY = velY/2;
         avion.setVelocity(velX/2,velY/2);
+    }
+}
+
+function getUnidadDesplazamiento(avion){
+    avion.unidadDeVelocidad = 1;
+    //console.log("unidadDeVelocidad inicial:" + unidadDeVelocidad);
+
+    if (avion.tieneBomba) {
+        avion.unidadDeVelocidad = avion.unidadDeVelocidad - avion.unidadDeVelocidad*0.50;
+    }
+    //console.log("unidadDeVelocidad luego del if avion.tieneBomba:" + unidadDeVelocidad);
+
+    if(avion.z > 100){ ///altura maxima
+        avion.unidadDeVelocidad = avion.unidadDeVelocidad - avion.unidadDeVelocidad*0.50;
+    }
+    //console.log("unidadDeVelocidad luego del if avion.z:" + unidadDeVelocidad);
+
+    if ( (avion.tieneBomba) && (avion.z > 100) ) {
+        avion.unidadDeVelocidad = avion.unidadDeVelocidad*0.10;
+    }
+    //console.log("unidadDeVelocidad luego del if (avion.tieneBomba) && (avion.z > 100) :" + unidadDeVelocidad);
+}
+
+
+function setDescuentoCombustibleAvionUPDATE(num, avion){
+    ////obtener el segundo valor para descontar cuando toca tecla para moverse
+    getunidadDeConsumoCombustible(num, avion);
+    console.log("avion.unidadDeConsumoCombustible::"+ avion.unidadDeConsumoCombustible );
+    if ( avion.cantCombustible > 0) {
+        avion.cantCombustible = avion.cantCombustible - avion.unidadDeConsumoCombustible;
+    } else {
+        ////EVENTO DE DESTRUCCION/caida POR FALTA DE COMBUSTIBLE
+    }
+
+}
+
+function getunidadDeConsumoCombustible(num, avion){
+    avion.unidadDeConsumoCombustible = 1;
+    if (avion.tieneBomba) {
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1 ;
+    }
+    if(avion.z > 100){ ///altura maxima
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1;
+    }
+    if (modificoDireccion) {
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1;
     }
 }
 
