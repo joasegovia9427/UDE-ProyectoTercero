@@ -272,6 +272,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.torreControl.bullets_torre.physicsBodyType = Phaser.Physics.ARCADE;
+            this.torreControl.setImmovable();
             Gpo_ElementosBaseAliada.add(this.torreControl);
 
             ////CREACION DE deposito_bombas
@@ -279,13 +280,17 @@ export default class s7_campoBatalla extends Phaser.Scene {
             this.deposito_bombas.setCollideWorldBounds(true);
             this.deposito_bombas.setBounce(0);
             this.deposito_bombas.vida = 100;
+            this.deposito_bombas.setImmovable();
             Gpo_ElementosBaseAliada.add(this.deposito_bombas);
+ 
 
             ////CREACION DE pistaAviones
             this.pistaAviones = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), (baseAliada_y+(elemento_w/2)+(elemento_espacio*2)) , 'pistaAviones_negro');     /////    baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
             this.pistaAviones.setCollideWorldBounds(true);
             this.pistaAviones.setBounce(0);
+            this.pistaAviones.setImmovable();
             Gpo_ElementosBaseAliada.add(this.pistaAviones);
+
 
             ////CREACION DE Artilleros
             this.artilleroA_1 = this.physics.add.image(300,450,"artillero_negro");//.setDisplayOrigin(0, 0);   //(juego_var_nav_width*0.90-88)
@@ -575,10 +580,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
         /// CREO UN TIMER PARA QUE CADA UN MINUTO MUEVA LOS ARTILLEROS RANDOM.
 
         timer = this.time.addEvent({
-            delay: 60000,                // ms
+            delay: 5000,                // ms
             //callback: callback,
             callback: moverGrupodeArtilleros,
-            args: [Gpo_ArtillerosAliados.getChildren()],
+            args: [Gpo_ArtillerosAliados.getChildren(),Gpo_AvionesEnemigos.getChildren()],
             callbackScope: Gpo_ArtillerosAliados,
             loop: true,
         });
@@ -1012,7 +1017,7 @@ function artilleroOnCollide(artillero, objeto2){
     objeto2.setTexture("artillero_negro_activo");  
     artilleroSetearUbicacion(artillero);
      */
-    console.log("origen: "+artillero.texture.key,"destino:"+objeto2.texture.key);
+   // console.log("origen: "+artillero.texture.key,"destino:"+objeto2.texture.key);
     artilleroSetearUbicacion(artillero);
                             
 }
@@ -1021,12 +1026,33 @@ function moverArtillero(artillero){
     artillero.x=Phaser.Math.Between(campoAliado_x, campoAliado_w);
 } // artillero setear oncollide function with Base
 
-function moverGrupodeArtilleros(gpo){
+function moverGrupodeArtilleros(){
+//console.log("hola");
+var arrayArtillerosAliados = Gpo_ArtillerosAliados.getChildren();
+var arrayAvionesEnemigas = Gpo_AvionesEnemigos.getChildren();
+    //Para cada artillero del array
+    for (i = 0; i < arrayArtillerosAliados.length; i++){
+        if(arrayArtillerosAliados[i].vida > 0){
+            arrayArtillerosAliados[i].HayEnemigo = false;
+            arrayArtillerosAliados[i].setTexture("artillero_negro");
+            //para cada avion enemiga
+            for (j = 0; j < arrayAvionesEnemigas.length; j++){
+                if(arrayAvionesEnemigas[j].vida > 0){
+                    if (arrayAvionesEnemigas[j].z < 200){
+                        //si distancia entre artillero y avion < 100
+                        distanciaEntreDosObjetos = distanceRound(arrayArtillerosAliados[i], arrayAvionesEnemigas[j]); 
+                        rangoMaximoVision = arrayArtillerosAliados[i].rangoVision;
+                        if (distanciaEntreDosObjetos > rangoMaximoVision) {
+                            moverArtillero(arrayArtillerosAliados[i]);
+                            //console.log("Llego aca");
+                        }
+                    } 
+                }
+            }
+        }
 
-     //Para cada artillero del array
-    for (i = 0; i < gpo.length; i++){
-        gpo[i].x=Phaser.Math.Between(campoAliado_x, campoAliado_w);
     }
+       
 } // artillero setear oncollide function with Base
 
 
