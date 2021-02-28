@@ -312,7 +312,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_1.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_1.num + " :: " + this.artilleroA_1.x + "    X    "+ this.artilleroA_1.y);
+            //console.log("artillero "+this.artilleroA_1.num + " :: " + this.artilleroA_1.x + "    X    "+ this.artilleroA_1.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_1);
             Gpo_ArtillerosAliados.add(this.artilleroA_1);
 
@@ -335,7 +335,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_2.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_2.num + " :: " + this.artilleroA_2.x + "    X    "+ this.artilleroA_2.y);
+            //console.log("artillero "+this.artilleroA_2.num + " :: " + this.artilleroA_2.x + "    X    "+ this.artilleroA_2.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_2);
             Gpo_ArtillerosAliados.add(this.artilleroA_2);
 
@@ -358,7 +358,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_3.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_3.num + " :: " + this.artilleroA_3.x + "    X    "+ this.artilleroA_3.y);           
+            //console.log("artillero "+this.artilleroA_3.num + " :: " + this.artilleroA_3.x + "    X    "+ this.artilleroA_3.y);           
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_3);
             Gpo_ArtillerosAliados.add(this.artilleroA_3);
 
@@ -381,7 +381,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_4.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_4.num + " :: " + this.artilleroA_4.x + "    X    "+ this.artilleroA_4.y);         
+           // console.log("artillero "+this.artilleroA_4.num + " :: " + this.artilleroA_4.x + "    X    "+ this.artilleroA_4.y);         
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_4);
             Gpo_ArtillerosAliados.add(this.artilleroA_4);
 
@@ -404,7 +404,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_5.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_5.num + " :: " + this.artilleroA_5.x + "    X    "+ this.artilleroA_5.y);
+            //console.log("artillero "+this.artilleroA_5.num + " :: " + this.artilleroA_5.x + "    X    "+ this.artilleroA_5.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_5);
             Gpo_ArtillerosAliados.add(this.artilleroA_5);
 
@@ -427,7 +427,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 runChildUpdate: true
             });
             this.artilleroA_6.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
-            console.log("artillero "+this.artilleroA_6.num + " :: " + this.artilleroA_6.x + "    X    "+ this.artilleroA_6.y);
+            //console.log("artillero "+this.artilleroA_6.num + " :: " + this.artilleroA_6.x + "    X    "+ this.artilleroA_6.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_6);
             Gpo_ArtillerosAliados.add(this.artilleroA_6);
 
@@ -849,7 +849,7 @@ function getUnidadDesplazamiento(avion){
 function setDescuentoCombustibleAvionUPDATE(num, avion){
     ////obtener el segundo valor para descontar cuando toca tecla para moverse
     getunidadDeConsumoCombustible(num, avion);
-    console.log("avion.unidadDeConsumoCombustible::"+ avion.unidadDeConsumoCombustible );
+    //("avion.unidadDeConsumoCombustible::"+ avion.unidadDeConsumoCombustible );
     if ( avion.cantCombustible > 0) {
         avion.cantCombustible = avion.cantCombustible - avion.unidadDeConsumoCombustible;
     } else {
