@@ -1107,7 +1107,7 @@ function hayEnemigoEnRangoTorreDeControl(time){
                     sceneJuego.torreControl.hayEnemigo = true;                    
                     sceneJuego.torreControl.setTexture("torreControl_negro_activo");  
                     ////DISPARA UN EVENTO --> disparo bala fisica, imagen y sonido 
-                    evento_torreControl_disparo(time, sceneJuego.torreControl, arrayAvionesEnemigas[j]); 
+                    evento_torreControl_disparo(time, sceneJuego.torreControl, arrayAvionesEnemigas[j]);
                 }
 
             }
@@ -1172,16 +1172,22 @@ function evento_torreControl_disparo(time, in_TorreOrigen, in_AvionEnemiga){
     juego_var_destinoCreacionBalas = 0;
     if ((time > in_TorreOrigen.lastFiredTorre)){
         var bullet = in_TorreOrigen.bullets_torre.get();
-        
+        alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
         /* var bullet = bullets_torre.get(); */
         if (bullet)
         {
             anguloEntre_TorreAvion = Phaser.Math.Angle.BetweenPoints(in_TorreOrigen, in_AvionEnemiga);
             in_TorreOrigen.rotation = anguloEntre_TorreAvion;
+            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            //var aux =anguloEntre_TorreAvion;
             Phaser.Geom.Line.SetToAngle(line, in_TorreOrigen.x, in_TorreOrigen.y - 50, anguloEntre_TorreAvion, 128);
+            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             gfx.clear().strokeLineShape(line);
 
-            bullet.fire(in_TorreOrigen);
+            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            bullet.fire(in_TorreOrigen,'Torre');
+            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            //in_TorreOrigen.angle=0;
             snd_metralleta.play();
             in_TorreOrigen.lastFiredTorre = time + 100;
         }
@@ -1279,7 +1285,7 @@ var Bullet = new Phaser.Class({
         this._temp = new Phaser.Math.Vector2();
     },
 
-    fire: function (ship, angulo)
+    fire: function (ship)
     {
         /* this.lifespan = 1000; */
 
