@@ -479,6 +479,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
         ////CREACION DE AVIONES ALIADAS:: aviones aliadas A_x
+        
         this.avionA_1 = this.physics.add.image(100,100,"avionNegro");//.setDisplayOrigin(0, 0);
         this.avionA_1.setCollideWorldBounds(true);
         this.avionA_1.setBounce(0);
@@ -590,47 +591,48 @@ export default class s7_campoBatalla extends Phaser.Scene {
         
 //// CREACION DE COLISIONES Y SOLAPAMIENTOS
 
-        // CHOQUE ENTRE AVIONES
-        this.physics.add.overlap(Gpo_AvionesAliados, Gpo_AvionesEnemigos, choqueAviones, null, this);
-        this.physics.add.overlap(Gpo_AvionesEnemigos, Gpo_AvionesAliados, choqueAviones, null, this);
-        
         // OVERLAP UTIL PARA ORDENAMIENTO DE ARTILLEROS EN TABLERO
         this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ArtillerosAliados, artilleroOnCollide, null, this);
         this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ElementosBaseAliada, artilleroOnCollide, null, this);
+        
+        // CHOQUE ENTRE AVIONES
+        this.physics.add.overlap(Gpo_AvionesAliados, Gpo_AvionesEnemigos, choqueAviones, null, this);
+        this.physics.add.overlap(Gpo_AvionesEnemigos, Gpo_AvionesAliados, choqueAviones, null, this);
        
         // DISPARO DESDE AVION ENEMIGO.
         // 1  --->  HABRIA QUE CREAR UN GPO DE ARMAS AVIONES ALIADO Y ENEMIGA. ASI COMO PARA BOMBAS.
-        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ArtillerosAliados, null, null, this);
-        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_AvionesAliados, null, null, this);
-        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ElementosBaseAliada, null, null, this);
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ArtillerosAliados, impactoBalaEnArtilleroA, null, this);
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this);
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ElementosBaseAliada, impactoBalaEnElementoBaseA, null, this);
 
         // DISPARO DESDE AVION ALIADO
-        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_AvionesEnemigos, impactoBalaAvion, null, this);
-        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ElementosBaseEnemiga, null, null, this);
-        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ArtillerosEnemigos, null, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ElementosBaseEnemiga, impactoBalaEnElementoBaseE, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ArtillerosEnemigos, impactoBalaEnArtilleroE, null, this);
 
-         // DISPARO DESDE TORRE ALIADA
-         this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesEnemigos, null, null, this);
-         this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesAliados, null, null, this);
+        // DISPARO DESDE TORRE ALIADA
+        this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        // DISPARO DESDE TORRE ENEMIGA
+ //-->  this.physics.add.overlap(this.torreControlE.bullet_torre_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this);
 
-         // DISPARO DESDE TORRE ENEMIGA  
-        /*  this.physics.add.overlap(this.torreControlE.bullet_torre_Enemiga, Gpo_AvionesEnemigos, null, null, this);
-         this.physics.add.overlap(this.torreControlE.bullet_torre_Enemiga, Gpo_AvionesAliados, null, null, this); */
 
-        // DISPARO DESDE ARTILLEROS
+        // DISPARO DESDE ARTILLEROS ALIADOS
         
-        this.physics.add.overlap(this.artilleroA_1.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_1.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
-        this.physics.add.overlap(this.artilleroA_2.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_2.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
-        this.physics.add.overlap(this.artilleroA_3.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_3.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
-        this.physics.add.overlap(this.artilleroA_4.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_4.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
-        this.physics.add.overlap(this.artilleroA_5.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_5.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
-        this.physics.add.overlap(this.artilleroA_6.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
-        //this.physics.add.overlap(this.artilleroE_6.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_1.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.artilleroA_2.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.artilleroA_3.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.artilleroA_4.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.artilleroA_5.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(this.artilleroA_6.bullets_artillero_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
+        
+
+        /* this.physics.add.overlap(this.artilleroE_1.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this); 
+        this.physics.add.overlap(this.artilleroE_2.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this); 
+        this.physics.add.overlap(this.artilleroE_3.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this); 
+        this.physics.add.overlap(this.artilleroE_4.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this); 
+        this.physics.add.overlap(this.artilleroE_5.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this); 
+        this.physics.add.overlap(this.artilleroE_6.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this);  */ 
+
 
         /// AGREGAR OVERLAP DE BOMBA!!!
         
@@ -1005,11 +1007,83 @@ function artilleroSetearUbicacion(artillero){
     artillero.y = y;
 
 //  console.log("artillero "+artillero.num + " :: " + artillero.x + "    X    "+ artillero.y); 
-   
-   
-   
+    
 }
-function impactoBalaAvion(avion, bala ){
+function impactoBalaEnElementoBaseA(elem_base,bala){
+
+    elem_base.vida--;
+    console.log(bala);
+    snd_impacto_metralleta.play();
+    //p1Danado = true;
+    //console.log("recibio disparo"+artillero.vida);
+    bala.kill();
+    if (elem_base.vida <= 0){
+    //  console.log(artillero.vida);
+        boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
+        boom.anims.play('explode');
+        snd_explosion.play();
+        Gpo_ElementosBaseAliada.killAndHide(elem_base);      
+
+    } 
+
+} 
+function impactoBalaEnElementoBaseE(elem_base,bala){
+
+    elem_base.vida--;
+    console.log(bala);
+    snd_impacto_metralleta.play();
+    //p1Danado = true;
+    //console.log("recibio disparo"+artillero.vida);
+    bala.kill();
+    if (elem_base.vida <= 0){
+    //  console.log(artillero.vida);
+        boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
+        boom.anims.play('explode');
+        snd_explosion.play();
+        Gpo_ElementosBaseEnemiga.killAndHide(elem_base);
+        //Gpo_ArtillerosAliados.killAndHide(torre);        
+
+    } 
+
+} 
+ function impactoBalaEnArtilleroA(artillero,bala){
+
+    artillero.vida--;
+    console.log(bala);
+    snd_impacto_metralleta.play();
+    //p1Danado = true;
+    //console.log("recibio disparo"+artillero.vida);
+    bala.kill();
+    if (artillero.vida <= 0){
+    //  console.log(artillero.vida);
+        boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
+        boom.anims.play('explode');
+        snd_explosion.play();
+        Gpo_ArtillerosAliados.killAndHide(artillero);
+       // Gpo_ArtillerosAliados.killAndHide(artillero);        
+
+    } 
+} 
+function impactoBalaEnArtilleroE(artillero,bala){
+
+    artillero.vida--;
+    console.log(bala);
+    snd_impacto_metralleta.play();
+    //p1Danado = true;
+    //console.log("recibio disparo"+artillero.vida);
+    bala.kill();
+    if (artillero.vida <= 0){
+    //  console.log(artillero.vida);
+        boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
+        boom.anims.play('explode');
+        snd_explosion.play();
+        Gpo_ArtillerosEnemigos.killAndHide(artillero);
+       // Gpo_ArtillerosEnemigos.killAndHide(artillero);        
+
+    } 
+} 
+
+function impactoBalaEnAvionA(avion, bala ){
 
         avion.vida--;
         //console.log(bala);
@@ -1023,9 +1097,27 @@ function impactoBalaAvion(avion, bala ){
             boom.anims.play('explode');
             snd_explosion.play();
             Gpo_AvionesAliados.killAndHide(avion);
-            Gpo_AvionesEnemigos.killAndHide(avion);        
+           // Gpo_AvionesEnemigos.killAndHide(avion);        
 
         } 
+} 
+function impactoBalaEnAvionE(avion, bala ){
+
+    avion.vida--;
+    //console.log(bala);
+    snd_impacto_metralleta.play();
+    //p1Danado = true;
+    //console.log("recibio disparo"+avion.vida);
+    bala.kill();
+    if (avion.vida <= 0){
+    //  console.log(avion.vida);
+        boom = this.add.sprite(avion.x, avion.y, 'explosion');
+        boom.anims.play('explode');
+        snd_explosion.play();
+        Gpo_AvionesEnemigos.killAndHide(avion);
+        //Gpo_AvionesEnemigos.killAndHide(avion);        
+
+    } 
 } 
 
 function choqueAviones(avion1,avion2){
@@ -1033,10 +1125,10 @@ function choqueAviones(avion1,avion2){
 /// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
     Gpo_AvionesAliados.killAndHide(avion1);
     Gpo_AvionesEnemigos.killAndHide(avion2);
-    avion1.disableBody(true, true);
+/*     avion1.disableBody(true, true);
     avion2.disableBody(true, true);
     avion1.setActive(false);
-    avion2.setActive(false);
+    avion2.setActive(false); */
     /// MOVEMOS LOS AVIONES ALIADOS A CAMPO ALIADO Y LOS ENEMIGOS A CAMPO ENEMIGO POR SOMBRAS???
     // sacamos el spotlight para afuera del tablero..
   /*   spotlight.x=baseAliada_x;
@@ -1108,7 +1200,7 @@ function hayEnemigoEnRangoArtillero(time){
                         distanciaEntreDosObjetos = distanceRound(arrayArtillerosAliados[i], arrayAvionesEnemigas[j]); 
                         
                         rangoMaximoVision = arrayArtillerosAliados[i].rangoVision;
-                        if (distanciaEntreDosObjetos <= rangoMaximoVision) {
+                        if (distanciaEntreDosObjetos <= rangoMaximoVision ) {
                             //cambio att de artillero
                             arrayArtillerosAliados[i].hayEnemigo = true;                    
                             arrayArtillerosAliados[i].setTexture("artillero_negro_activo");  
