@@ -39,6 +39,11 @@ var Gpo_AvionesEnemigos;
 var Gpo_ElementosBaseEnemiga;
 var Gpo_ArtillerosEnemigos;
 
+/* var Gpo_Balas_Aliadas;
+var Gpo_Balas_Enemigas
+var Gpo_Bombas_Enemigas;
+var Gpo_Bombas_Aliadas; */
+
 var distanciaEntreDosObjetos = 0;
 var rangoMaximoVision = 0;
 
@@ -66,9 +71,10 @@ var mi_base_w;
 var mi_base_h;
 
 var bullets;
-var bullets_artillero;
+/* var bullets_artillero_Aliada;
 var bullets_torre;
-var bullets_avion;
+var bullets_avion_Aliado;
+var bullets_avion_Enemigo; */
 
 var timer; 
 
@@ -79,9 +85,14 @@ var anguloEntre_AvionYElementoEnemigo;
 var line;
 var gfx;
 
-// sonido
+// efectos y sonidos
+var boom;
+var explotar;
 var snd_metralleta;
 var snd_impacto_metralleta;
+var snd_explosion
+
+// efectos
 
 var avionActivaUltimaVX = 0;
 var avionActivaUTlimaVY = 0;
@@ -145,6 +156,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         //balas
         this.load.image("bala", "./assets/images/objetos/bala.png");
+
+        // EXPLOSION
+
+        this.load.spritesheet('explosion', './assets/images/efectos/explosion2.png', { frameWidth: 64, frameHeight: 64, endFrame: 23 });
         //bombas
 
         this.load.image('mask', './assets/images/mapaCapaOculta/mask1.png');
@@ -165,7 +180,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         
         this.load.audio('snd_disparo_metralleta', "./assets/sounds/metralleta.m4a");
         this.load.audio('snd_impacto_metralleta', "./assets/sounds/impactometralleta.mp3");
-
+        this.load.audio('sonidoexplosion', './assets/sounds//explosion.mp3');
         ////------------MUSICA y SONIDOS FIN----------------------------------
     } ////CIERRE PRELOAD
 
@@ -174,7 +189,17 @@ export default class s7_campoBatalla extends Phaser.Scene {
     create() {
 
 
-        //alert(juego_var_nav_width + "  x  " + juego_var_nav_height);
+        /// EFECTOS Y SONIDOS
+
+        // SONIDOS
+        snd_explosion = this.sound.add('sonidoexplosion');
+        //ANIMACIÓN PARA LA EXPLOSIÓN
+        explotar = {
+            key: 'explode',
+            frames: this.anims.generateFrameNumbers('explosion', { start: 0, end: 23, first: 23 }),
+            frameRate: 20
+        };
+        this.anims.create(explotar);
         
         /// CREO GRUPOS DE OBJETOS
         Gpo_ArtillerosAliados= this.add.group();
@@ -256,24 +281,26 @@ export default class s7_campoBatalla extends Phaser.Scene {
             /* var elemento_w = this.deposito_combustible.width;
             var elemento_espacio = 20; */
             this.deposito_combustible.vida = 100;
+            this.deposito_combustible.physicsBodyType = Phaser.Physics.ARCADE;;
             Gpo_ElementosBaseAliada.add(this.deposito_combustible);
        
             ////CREACION DE torreControl
-            this.torreControl = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
-            this.torreControl.setCollideWorldBounds(true);
-            this.torreControl.setBounce(0);
-            this.torreControl.vida = 100;
-            this.torreControl.hayEnemigo = false;
-            this.torreControl.rangoVision = rangoVisionTorre;
-            this.torreControl.lastFiredTorre = 0;
-            this.torreControl.bullets_torre = this.physics.add.group({
+            this.torreControlA = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
+            this.torreControlA.setCollideWorldBounds(true);
+            this.torreControlA.setBounce(0);
+            this.torreControlA.vida = 100;
+            this.torreControlA.hayEnemigo = false;
+            this.torreControlA.rangoVision = rangoVisionTorre;
+            this.torreControlA.lastFiredTorre = 0;
+            this.torreControlA.bullet_torre_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.torreControl.bullets_torre.physicsBodyType = Phaser.Physics.ARCADE;
-            this.torreControl.setImmovable();
-            Gpo_ElementosBaseAliada.add(this.torreControl);
+            this.torreControlA.bullet_torre_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
+            this.torreControlA.setImmovable();
+            this.torreControlA.physicsBodyType = Phaser.Physics.ARCADE;
+            Gpo_ElementosBaseAliada.add(this.torreControlA);
 
             ////CREACION DE deposito_bombas
             this.deposito_bombas = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro');//.setDisplayOrigin(0, 0);
@@ -281,6 +308,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             this.deposito_bombas.setBounce(0);
             this.deposito_bombas.vida = 100;
             this.deposito_bombas.setImmovable();
+            this.deposito_bombas.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ElementosBaseAliada.add(this.deposito_bombas);
  
 
@@ -289,6 +317,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             this.pistaAviones.setCollideWorldBounds(true);
             this.pistaAviones.setBounce(0);
             this.pistaAviones.setImmovable();
+            this.pistaAviones.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ElementosBaseAliada.add(this.pistaAviones);
 
 
@@ -306,12 +335,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_1);
             /* arrayTorretaX.push(this.artilleroA_1.x);
             arrayTorretaY.push(this.artilleroA_1.y); */
-            this.artilleroA_1.bullets_artillero = this.physics.add.group({
+            this.artilleroA_1.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_1.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_1.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_1.physicsBodyType = Phaser.Physics.ARCADE;
             //console.log("artillero "+this.artilleroA_1.num + " :: " + this.artilleroA_1.x + "    X    "+ this.artilleroA_1.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_1);
             Gpo_ArtillerosAliados.add(this.artilleroA_1);
@@ -329,12 +359,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_2);
             /* arrayTorretaX.push(this.artilleroA_2.x);
             arrayTorretaY.push(this.artilleroA_2.y); */
-            this.artilleroA_2.bullets_artillero = this.physics.add.group({
+            this.artilleroA_2.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_2.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_2.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_2.physicsBodyType = Phaser.Physics.ARCADE;
             //console.log("artillero "+this.artilleroA_2.num + " :: " + this.artilleroA_2.x + "    X    "+ this.artilleroA_2.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_2);
             Gpo_ArtillerosAliados.add(this.artilleroA_2);
@@ -352,14 +383,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_3);
             /* arrayTorretaX.push(this.artilleroA_3.x);
             arrayTorretaY.push(this.artilleroA_3.y); */
-            this.artilleroA_3.bullets_artillero = this.physics.add.group({
+            this.artilleroA_3.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_3.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_3.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
             //console.log("artillero "+this.artilleroA_3.num + " :: " + this.artilleroA_3.x + "    X    "+ this.artilleroA_3.y);           
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_3);
+            this.artilleroA_3.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ArtillerosAliados.add(this.artilleroA_3);
 
             this.artilleroA_4 = this.physics.add.image(300,450,"artillero_negro");//.setDisplayOrigin(0, 0);
@@ -375,14 +407,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_4);
             /* arrayTorretaX.push(this.artilleroA_4.x);
             arrayTorretaY.push(this.artilleroA_4.y); */
-            this.artilleroA_4.bullets_artillero = this.physics.add.group({
+            this.artilleroA_4.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_4.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_4.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
            // console.log("artillero "+this.artilleroA_4.num + " :: " + this.artilleroA_4.x + "    X    "+ this.artilleroA_4.y);         
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_4);
+            this.artilleroA_4.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ArtillerosAliados.add(this.artilleroA_4);
 
             this.artilleroA_5 = this.physics.add.image(300,450,"artillero_negro");//.setDisplayOrigin(0, 0);
@@ -398,14 +431,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_5);
             /* arrayTorretaX.push(this.artilleroA_5.x);
             arrayTorretaY.push(this.artilleroA_5.y); */
-            this.artilleroA_5.bullets_artillero = this.physics.add.group({
+            this.artilleroA_5.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_5.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_5.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
             //console.log("artillero "+this.artilleroA_5.num + " :: " + this.artilleroA_5.x + "    X    "+ this.artilleroA_5.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_5);
+            this.artilleroA_5.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ArtillerosAliados.add(this.artilleroA_5);
 
             this.artilleroA_6 = this.physics.add.image(300,450,"artillero_negro");//.setDisplayOrigin(0, 0);
@@ -421,14 +455,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
             artilleroSetearUbicacion(this.artilleroA_6);
             /* arrayTorretaX.push(this.artilleroA_6.x);
             arrayTorretaY.push(this.artilleroA_6.y); */
-            this.artilleroA_6.bullets_artillero = this.physics.add.group({
+            this.artilleroA_6.bullets_artillero_Aliada = this.physics.add.group({
                 classType: Bullet,
                 maxSize: 3,
                 runChildUpdate: true
             });
-            this.artilleroA_6.bullets_artillero.physicsBodyType = Phaser.Physics.ARCADE;
+            this.artilleroA_6.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
             //console.log("artillero "+this.artilleroA_6.num + " :: " + this.artilleroA_6.x + "    X    "+ this.artilleroA_6.y);
             //cantidadArtillerosAliadas = arrayArtillerosAliados.push(this.artilleroA_6);
+            this.artilleroA_6.physicsBodyType = Phaser.Physics.ARCADE;
             Gpo_ArtillerosAliados.add(this.artilleroA_6);
 
         /////----------^^^^^^^^^^^^CREACION DE MI BASE^^^^^^^^^^^-------------
@@ -462,14 +497,16 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.avionA_1.bando = "Aliado";
         this.avionA_1.HayEnemigo = false;
         this.avionA_1.lastFiredAvion = 0;
-        this.avionA_1.bullets_avion = this.physics.add.group({
+        this.avionA_1.bullets_avion_Aliado = this.physics.add.group({
             classType: Bullet,
             maxSize: 5,
             runChildUpdate: true
         });
-        this.avionA_1.bullets_avion.physicsBodyType = Phaser.Physics.ARCADE;
+        this.avionA_1.bullets_avion_Aliado.physicsBodyType = Phaser.Physics.ARCADE;
+        this.avionA_1.physicsBodyType = Phaser.Physics.ARCADE;
         //cantidadAvionesAliadas = arrayAvionesAliadas.push(this.avionA_1);
         Gpo_AvionesAliados.add(this.avionA_1);
+        Gpo_AvionesAliados.setDepth(0);
         // activo, velocidad, aceleracion
 
 
@@ -480,27 +517,30 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.avionE_1.scaleX=0.2;
         this.avionE_1.scaleY=0.2;
         this.avionE_1.z = 100; 
+        //this.avionE_1.setDepth(1);
         this.avionE_1.vida = 100;
         this.avionE_1.rangoVision = rangoVisionAvion;
         this.avionE_1.angle = 90;
         this.avionE_1.tieneBomba = true;
         this.avionE_1.cantBombas = 1;
         this.avionE_1.cantCombustible = 10000;
-        this.avionA_1.unidadDeVelocidad = 0;
-        this.avionA_1.unidadDeConsumoCombustible = 0;
+        this.avionE_1.unidadDeVelocidad = 0;
+        this.avionE_1.unidadDeConsumoCombustible = 0;
         this.avionE_1.isAvionEnCampoEnemigo = false;
         this.avionE_1.bando = "Enemigo";
         this.avionE_1.HayEnemigo = false;
         this.avionE_1.lastFiredAvion = 0;
-        this.avionE_1.bullets_avion = this.physics.add.group({
+        this.avionE_1.bullets_avion_Enemigo = this.physics.add.group({
             classType: Bullet,
             maxSize: 5,
             runChildUpdate: true
         });
-        this.avionE_1.bullets_avion.physicsBodyType = Phaser.Physics.ARCADE; 
-        this.avionE_1.setVelocity(0,10);
+        this.avionE_1.bullets_avion_Enemigo.physicsBodyType = Phaser.Physics.ARCADE; 
+        this.avionE_1.setVelocity(-80,0);
         //cantidadAvionesAliadas = arrayAvionesEnemigas.push(this.avionE_1);
+        this.avionE_1.physicsBodyType = Phaser.Physics.ARCADE;
         Gpo_AvionesEnemigos.add(this.avionE_1);
+        Gpo_AvionesEnemigos.setDepth(0);
 
         ////CREACION DE MASCARA
         spotlight = this.make.sprite({
@@ -510,8 +550,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
             add: false,
         });
         spotlight_instance = new Phaser.Display.Masks.BitmapMask(this, spotlight);
-        this.pisoEnemigo.mask   = spotlight_instance;
-        this.avionE_1.mask      = spotlight_instance;
+        this.pisoEnemigo.mask = spotlight_instance;
+        this.avionE_1.mask = spotlight_instance;
  
         //faltan elementos de base enemiga 4 elementos de base + 12artilleros + 4 avion
             
@@ -550,24 +590,50 @@ export default class s7_campoBatalla extends Phaser.Scene {
         
 //// CREACION DE COLISIONES Y SOLAPAMIENTOS
 
-        this.physics.add.overlap(this.avionA_1, this.avionE_1, null, null, this);
+        // CHOQUE ENTRE AVIONES
+        this.physics.add.overlap(Gpo_AvionesAliados, Gpo_AvionesEnemigos, choqueAviones, null, this);
+        this.physics.add.overlap(Gpo_AvionesEnemigos, Gpo_AvionesAliados, choqueAviones, null, this);
         
+        // OVERLAP UTIL PARA ORDENAMIENTO DE ARTILLEROS EN TABLERO
         this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ArtillerosAliados, artilleroOnCollide, null, this);
         this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ElementosBaseAliada, artilleroOnCollide, null, this);
+       
+        // DISPARO DESDE AVION ENEMIGO.
+        // 1  --->  HABRIA QUE CREAR UN GPO DE ARMAS AVIONES ALIADO Y ENEMIGA. ASI COMO PARA BOMBAS.
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ArtillerosAliados, null, null, this);
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_AvionesAliados, null, null, this);
+        this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ElementosBaseAliada, null, null, this);
 
-/*         this.physics.add.collider(this.artilleroA_1, this.deposito_bombas, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.deposito_combustible, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.torreControl, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.pistaAviones, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.artilleroA_2, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.artilleroA_3, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.artilleroA_4, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.artilleroA_5, artilleroOnCollide, null, this);
-        this.physics.add.collider(this.artilleroA_1, this.artilleroA_6, artilleroOnCollide, null, this);
- */
+        // DISPARO DESDE AVION ALIADO
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_AvionesEnemigos, impactoBalaAvion, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ElementosBaseEnemiga, null, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ArtillerosEnemigos, null, null, this);
+
+         // DISPARO DESDE TORRE ALIADA
+         this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesEnemigos, null, null, this);
+         this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesAliados, null, null, this);
+
+         // DISPARO DESDE TORRE ENEMIGA  
+        /*  this.physics.add.overlap(this.torreControlE.bullet_torre_Enemiga, Gpo_AvionesEnemigos, null, null, this);
+         this.physics.add.overlap(this.torreControlE.bullet_torre_Enemiga, Gpo_AvionesAliados, null, null, this); */
+
+        // DISPARO DESDE ARTILLEROS
         
-    
+        this.physics.add.overlap(this.artilleroA_1.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_1.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_2.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_2.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_3.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_3.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_4.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_4.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_5.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_5.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
+        this.physics.add.overlap(this.artilleroA_6.bullets_artillero_Aliada, Gpo_AvionesEnemigos, null, null, this);
+        //this.physics.add.overlap(this.artilleroE_6.bullets_artillero_Aliada, Gpo_AvionesAliados, null, null, this); 
 
+        /// AGREGAR OVERLAP DE BOMBA!!!
+        
 
         ///// CREACION DE TABLERO AVION
         tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '16px Courier', fill: '#00ff00' });
@@ -577,10 +643,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         sceneJuego = this;
 
-        /// CREO UN TIMER PARA QUE CADA UN MINUTO MUEVA LOS ARTILLEROS RANDOM.
+        /// CREO UN TIMER PARA QUE CADA 15 SEGS MUEVA LOS ARTILLEROS RANDOM.
 
         timer = this.time.addEvent({
-            delay: 5000,                // ms
+            delay: 15000,   // EN MILI SEGUNDOS
             //callback: callback,
             callback: moverGrupodeArtilleros,
             args: [Gpo_ArtillerosAliados.getChildren(),Gpo_AvionesEnemigos.getChildren()],
@@ -691,7 +757,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
           //// ACTUALIZAR TEXTO DE TABLERO BASE:
           tableroBase.setText([
             'DATOS BASE:',
-            'Vida de Torre: ' + this.torreControl.vida + '%',
+            'Vida de Torre: ' + this.torreControlA.vida + '%',
             'Vida de Dep. Combustible: ' + this.deposito_combustible.vida + '%',
             'Vida de Dep. Bombas: ' + this.deposito_bombas.vida + '%',
             'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
@@ -759,6 +825,8 @@ function evento_tecla_avionAltura0(){
         sceneJuego.avionA_activa.z=0;
         sceneJuego.avionA_activa.scaleX=0.1;
         sceneJuego.avionA_activa.scaleY=0.1;
+       //console.log(sceneJuego.avionA_activa.depth);
+        sceneJuego.avionA_activa.setDepth(0);
 
     
         ////se podria cambiar la sombra this.pajaroVision.setTexture("transparente");
@@ -781,6 +849,8 @@ function evento_tecla_avionAltura1(){
     sceneJuego.avionA_activa.z=100;
     sceneJuego.avionA_activa.scaleX=0.2;
     sceneJuego.avionA_activa.scaleY=0.2;
+    console.log(sceneJuego.avionA_activa.depth);
+    sceneJuego.avionA_activa.setDepth(1);
     
     ////this.pajaroVision.setTexture("transparente");
 
@@ -794,6 +864,8 @@ function evento_tecla_avionAltura2(){
     sceneJuego.avionA_activa.z=200;
     sceneJuego.avionA_activa.scaleX=0.3;
     sceneJuego.avionA_activa.scaleY=0.3;
+    console.log(sceneJuego.avionA_activa.depth);
+    sceneJuego.avionA_activa.setDepth(2);
 
     ////this.pajaroVision.setTexture("opaca");
      
@@ -929,95 +1001,57 @@ function artilleroSetearUbicacion(artillero){
     x = Phaser.Math.Between(campoAliado_x+50, campoAliado_w-50);
     y = Phaser.Math.Between(campoAliado_y+100, (mi_campo_y+campoAliado_h-30) );
         
-
-    //isCoordenadasCorrectas = true;
-    /* 
-    do { 
-        x = Phaser.Math.Between(campoAliado_x+50, campoAliado_w-50);
-        y = Phaser.Math.Between(campoAliado_y+100, (mi_campo_y+campoAliado_h-30) );
-        //// hasta aca tengo las torretas dentro de los margenes adecuados de x,y para mi base
-
-        ////VALIDACION CON BASE
-        console.log("----------");
-        console.log("x:"+x);
-        console.log("mi_base_x-10:"+ (mi_base_x-10) );
-        console.log("mi_base_w+10:"+ (mi_base_w+10) );
-        console.log("----------");
-
-
-        if( !( (x > (mi_base_x-10) ) && (x < (mi_base_w+10) ) ) ){//if( (x < mi_base_x-10) || (x > mi_base_w+10) ){
-            //correcto en x respecto a base
-            console.log("******** 1 correcto en x respecto a base");
-
-            console.log("y:"+y);
-            console.log("mi_base_y-10:"+ (mi_base_y-10));
-            console.log("mi_base_h+10:"+ (mi_base_h+10) );
-            //console.log("----------");
-
-            if( !( (y > (mi_base_y-10) ) && (y < (mi_base_h+10) ) ) ){//if( (y < mi_base_y-10) || (y > mi_base_h+10) ){
-                //correcto en y respecto a base
-                //console.log("******** 2 correcto en y respecto a base");
-
-                //console.log("******** arrayArtillerosAliados.length::"+ arrayArtillerosAliados.length);
-
-                for (i = 0; i < arrayArtillerosAliados.length; i++){
-                    //console.log("******** entro al for con i:"+i);
-                    
-                    
-                    //if(arrayArtillerosAliados[i].num != artillero.num){ 
-                        //console.log("******** 3 entro al if donde los num son distintos");
-
-                        x2 = arrayArtillerosAliados[i].x;
-                        y2 = arrayArtillerosAliados[i].y;
-
-                        //console.log("x2:"+x2);
-                        //console.log("y2:"+y2);
-
-    
-                        //console.log("----------");
-                        //console.log("x:"+x);
-
-                        if( !( (x > (x2-10) ) && (x < (elemento_w+10) ) ) ){//if( (x < x2-10) || (x > elemento_w+10) ){
-                            //correcto en x respecto a artillero
-                            //console.log("******** 4 correcto en x respecto a artillero");
-
-                            //console.log("y:"+y);
-
-                            if( !( (y > (y2-10) ) && (y < (elemento_w+10) ) ) ){//if( (y < y2-10) || (y > elemento_w+10) ){
-                               //correcto en y respecto a artillero 
-                               //console.log("******** 5 correcto en y respecto a artillero");
-
-                               ///isCoordenadasCorrectas = true;
-                               //console.log("******** 6 isCoordenadasCorrectas::"+isCoordenadasCorrectas);
-
-                            }else{isCoordenadasCorrectas = false;}
-      
-                        }else{isCoordenadasCorrectas = false;}
-                    //}
-                }
-  
-            }else{isCoordenadasCorrectas = false;}
-
-        }else{isCoordenadasCorrectas = false;}
-        
-    } while (isCoordenadasCorrectas == false);
- */
-   artillero.x = x;
-   artillero.y = y;
+    artillero.x = x;
+    artillero.y = y;
 
 //  console.log("artillero "+artillero.num + " :: " + artillero.x + "    X    "+ artillero.y); 
    
    
    
 }
+function impactoBalaAvion(avion, bala ){
+
+        avion.vida--;
+        //console.log(bala);
+        snd_impacto_metralleta.play();
+        //p1Danado = true;
+        console.log("recibio disparo"+avion.vida);
+        bala.kill();
+        if (avion.vida <= 0){
+        //  console.log(avion.vida);
+            boom = this.add.sprite(avion.x, avion.y, 'explosion');
+            boom.anims.play('explode');
+            snd_explosion.play();
+            Gpo_AvionesAliados.killAndHide(avion);
+            Gpo_AvionesEnemigos.killAndHide(avion);        
+
+        } 
+} 
+
+function choqueAviones(avion1,avion2){
+    if (avion1.z == avion2.z){
+/// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
+    Gpo_AvionesAliados.killAndHide(avion1);
+    Gpo_AvionesEnemigos.killAndHide(avion2);
+    avion1.disableBody(true, true);
+    avion2.disableBody(true, true);
+    avion1.setActive(false);
+    avion2.setActive(false);
+    /// MOVEMOS LOS AVIONES ALIADOS A CAMPO ALIADO Y LOS ENEMIGOS A CAMPO ENEMIGO POR SOMBRAS???
+    // sacamos el spotlight para afuera del tablero..
+  /*   spotlight.x=baseAliada_x;
+    spotlight.y=baseAliada_y; */
+    boom = this.add.sprite(avion1.x, avion1.y, 'explosion');
+    boom.anims.play('explode');
+	snd_explosion.play()
+    /// habria que deshabilitar spotlight y habilitarlo cada vez que se activa un avion.
+    /// si no hay aviones deberiamos dejar revelado el tablero y dar por terminada la partida.
+}
+
+}
 
 function artilleroOnCollide(artillero, objeto2){
-/*     console.log("collide artillero numero: " + artillero.num +  "    contra: "+objeto2.num);
-    artillero.setTexture("artillero_negro_activo");  
-    objeto2.setTexture("artillero_negro_activo");  
-    artilleroSetearUbicacion(artillero);
-     */
-   // console.log("origen: "+artillero.texture.key,"destino:"+objeto2.texture.key);
+
     artilleroSetearUbicacion(artillero);
                             
 }
@@ -1091,23 +1125,23 @@ function hayEnemigoEnRangoArtillero(time){
 }
 
 function hayEnemigoEnRangoTorreDeControl(time){
-    sceneJuego.torreControl.HayEnemigo = false;
-    sceneJuego.torreControl.setTexture("torreControl_negro");
+    sceneJuego.torreControlA.HayEnemigo = false;
+    sceneJuego.torreControlA.setTexture("torreControl_negro");
     var arrayAvionesEnemigas=Gpo_AvionesEnemigos.getChildren();
-    if(sceneJuego.torreControl.vida > 0){
+    if(sceneJuego.torreControlA.vida > 0){
         //para cada avion enemiga
         for (j = 0; j < arrayAvionesEnemigas.length; j++){
             if(arrayAvionesEnemigas[j].vida > 0){
                 //si distancia entre torre y avion < 100
-                distanciaEntreDosObjetos = distanceRound(sceneJuego.torreControl, arrayAvionesEnemigas[j]);
+                distanciaEntreDosObjetos = distanceRound(sceneJuego.torreControlA, arrayAvionesEnemigas[j]);
                 
-                rangoMaximoVision = sceneJuego.torreControl.rangoVision;
+                rangoMaximoVision = sceneJuego.torreControlA.rangoVision;
                 if (distanciaEntreDosObjetos <= rangoMaximoVision) {
                     //cambio att de torre
-                    sceneJuego.torreControl.hayEnemigo = true;                    
-                    sceneJuego.torreControl.setTexture("torreControl_negro_activo");  
+                    sceneJuego.torreControlA.hayEnemigo = true;                    
+                    sceneJuego.torreControlA.setTexture("torreControl_negro_activo");  
                     ////DISPARA UN EVENTO --> disparo bala fisica, imagen y sonido 
-                    evento_torreControl_disparo(time, sceneJuego.torreControl, arrayAvionesEnemigas[j]);
+                    evento_torreControl_disparo(time, sceneJuego.torreControlA, arrayAvionesEnemigas[j]);
                 }
 
             }
@@ -1151,8 +1185,8 @@ function removerArtillerosDelArrayActual(){
 function evento_artillero_disparo(time, in_ArtilleroOrigen, in_AvionEnemiga){
     juego_var_destinoCreacionBalas = 1;
     if ((time > in_ArtilleroOrigen.lastFiredArtillero)){ 
-        var bullet = in_ArtilleroOrigen.bullets_artillero.get();      
-        /* var bullet = bullets_artillero.get(); */
+        var bullet = in_ArtilleroOrigen.bullets_artillero_Aliada.get();      
+        /* var bullet = bullets_artillero_Aliada.get(); */
 
         if (bullet)
         {
@@ -1171,22 +1205,22 @@ function evento_artillero_disparo(time, in_ArtilleroOrigen, in_AvionEnemiga){
 function evento_torreControl_disparo(time, in_TorreOrigen, in_AvionEnemiga){
     juego_var_destinoCreacionBalas = 0;
     if ((time > in_TorreOrigen.lastFiredTorre)){
-        var bullet = in_TorreOrigen.bullets_torre.get();
-        alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+        var bullet = in_TorreOrigen.bullet_torre_Aliada.get();
+        //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
         /* var bullet = bullets_torre.get(); */
         if (bullet)
         {
             anguloEntre_TorreAvion = Phaser.Math.Angle.BetweenPoints(in_TorreOrigen, in_AvionEnemiga);
             in_TorreOrigen.rotation = anguloEntre_TorreAvion;
-            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+          //  alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             //var aux =anguloEntre_TorreAvion;
             Phaser.Geom.Line.SetToAngle(line, in_TorreOrigen.x, in_TorreOrigen.y - 50, anguloEntre_TorreAvion, 128);
-            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             gfx.clear().strokeLineShape(line);
 
-            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             bullet.fire(in_TorreOrigen,'Torre');
-            alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
+            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             //in_TorreOrigen.angle=0;
             snd_metralleta.play();
             in_TorreOrigen.lastFiredTorre = time + 100;
@@ -1199,7 +1233,7 @@ function evento_torreControl_disparo(time, in_TorreOrigen, in_AvionEnemiga){
 function evento_avion_disparo(time, in_AvionOrigen, in_ElementoEnemigo){
     juego_var_destinoCreacionBalas = 2;
 
-    var bullet = in_AvionOrigen.bullets_avion.get();
+    var bullet = in_AvionOrigen.bullets_avion_Aliado.get();
     if (bullet)
     {
         bullet.fire(in_AvionOrigen);
