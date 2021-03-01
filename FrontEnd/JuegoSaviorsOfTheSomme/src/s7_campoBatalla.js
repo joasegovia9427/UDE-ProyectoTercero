@@ -536,7 +536,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             runChildUpdate: true
         });
         this.avionE_1.bullets_avion_Enemigo.physicsBodyType = Phaser.Physics.ARCADE; 
-        this.avionE_1.setVelocity(-80,0);
+        this.avionE_1.setVelocity(0,150);
         //cantidadAvionesAliadas = arrayAvionesEnemigas.push(this.avionE_1);
         this.avionE_1.physicsBodyType = Phaser.Physics.ARCADE;
         Gpo_AvionesEnemigos.add(this.avionE_1);
@@ -1206,22 +1206,13 @@ function evento_torreControl_disparo(time, in_TorreOrigen, in_AvionEnemiga){
     juego_var_destinoCreacionBalas = 0;
     if ((time > in_TorreOrigen.lastFiredTorre)){
         var bullet = in_TorreOrigen.bullet_torre_Aliada.get();
-        //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
-        /* var bullet = bullets_torre.get(); */
         if (bullet)
         {
             anguloEntre_TorreAvion = Phaser.Math.Angle.BetweenPoints(in_TorreOrigen, in_AvionEnemiga);
             in_TorreOrigen.rotation = anguloEntre_TorreAvion;
-          //  alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
-            //var aux =anguloEntre_TorreAvion;
             Phaser.Geom.Line.SetToAngle(line, in_TorreOrigen.x, in_TorreOrigen.y - 50, anguloEntre_TorreAvion, 128);
-            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             gfx.clear().strokeLineShape(line);
-
-            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
             bullet.fire(in_TorreOrigen,'Torre');
-            //alert('rotate: '+in_TorreOrigen.rotation+ 'angle'+in_TorreOrigen.angle);
-            //in_TorreOrigen.angle=0;
             snd_metralleta.play();
             in_TorreOrigen.lastFiredTorre = time + 100;
         }
@@ -1319,7 +1310,7 @@ var Bullet = new Phaser.Class({
         this._temp = new Phaser.Math.Vector2();
     },
 
-    fire: function (ship)
+    fire: function (ship, tipo)
     {
         /* this.lifespan = 1000; */
 
