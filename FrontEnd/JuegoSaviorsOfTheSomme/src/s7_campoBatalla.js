@@ -1,4 +1,4 @@
-/////----------------version del archivo numero::  2021 03 02 a  ---- ultimo modificador:: Sebastian---
+/////----------------version del archivo numero::  2021 03 02 b  ---- ultimo modificador:: Joaquin---
 
 /////-----------------INICIO VARIABLES GLOBALES--------------------
 var sceneJuego;
@@ -96,7 +96,7 @@ var line;
 var gfx;
 
 // efectos y sonidos
-var boom, boom2;
+var boom, boom2, boom3;
 var explotar;
 var snd_metralleta;
 var snd_impacto_metralleta;
@@ -600,7 +600,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.separacionCampos.displayWidth = lineaSeparacion_w;
         this.separacionCampos.displayHeight = lineaSeparacion_h+100; 
         
-     
+        this.separacionCampos.setDepth(5);
 
 
         ///// CREACION DE TECLAS
@@ -652,16 +652,22 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this);
         this.physics.add.overlap(this.avionE_1.bullets_avion_Enemigo, Gpo_ElementosBaseAliada, impactoBalaEnElementoBaseA, null, this);
         this.physics.add.overlap(bombaBulletE, Gpo_ElementosBaseAliada, impactoBombaEnElementoBaseA, null, this);
-        this.physics.add.overlap(bombaBulletE, Gpo_ElementosBaseAliada, impactoBombaEnArtilleroA, null, this); // CAMBIAR!!
+        this.physics.add.overlap(bombaBulletE, Gpo_ArtillerosAliados, impactoBombaEnArtilleroA, null, this); 
 
         // DISPARO DESDE AVION ALIADO
         this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
         this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ElementosBaseEnemiga, impactoBalaEnElementoBaseE, null, this);
         this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ArtillerosEnemigos, impactoBalaEnArtilleroE, null, this);
         this.physics.add.overlap(bombaBulletA, Gpo_ElementosBaseEnemiga, impactoBombaEnElementoBaseE, null, this);
+        this.physics.add.overlap(bombaBulletA, Gpo_ArtillerosEnemigos, impactoBombaEnArtilleroE, null, this);
+
+        ///PRUEBAS BORRAR LUEGO ******************************************
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ElementosBaseAliada, impactoBalaEnElementoBaseA, null, this);
+        this.physics.add.overlap(this.avionA_1.bullets_avion_Aliado, Gpo_ArtillerosAliados, impactoBalaEnArtilleroA, null, this);
+        
         this.physics.add.overlap(bombaBulletA, Gpo_ElementosBaseAliada, impactoBombaEnElementoBaseA, null, this); // BORRAR
         this.physics.add.overlap(bombaBulletA, Gpo_ArtillerosAliados, impactoBombaEnArtilleroA, null, this);// BORRAR
-        this.physics.add.overlap(bombaBulletA, Gpo_ArtillerosAliados, impactoBombaEnArtilleroE, null, this);
+        
 
         // DISPARO DESDE TORRE ALIADA
         this.physics.add.overlap(this.torreControlA.bullet_torre_Aliada, Gpo_AvionesEnemigos, impactoBalaEnAvionE, null, this);
@@ -687,10 +693,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.physics.add.overlap(this.artilleroE_6.bullets_artillero_Aliada, Gpo_AvionesAliados, impactoBalaEnAvionA, null, this);  */ 
 
         ///// CREACION DE TABLERO AVION
-        tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '16px Courier', fill: '#00ff00' });
+        tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '16px Courier Bold', fill: '#00ff00' });
         ///// CREACION DE TABLERO BASE
-        tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '16px Courier', fill: '#00000' });
-    
+        tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '16px Courier Bold', fill: '#ffffff' });
+        
+        tableroAvion.setDepth(4);
+        tableroBase.setDepth(4)
 
         sceneJuego = this;
 
@@ -716,7 +724,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         
         ///// MOVIMIENTO DE AVION EN BASE A BOTONES
         ////LUEGO SACAR FISICAS PARA FUERA DEL IF DE BOTONES... ya que por mas que no muevas tu avion, tiene que recalcular en base al websockets los eventosasd
-        
+
+
         modificoDireccion = false;
 
         getUnidadDesplazamiento(this.avionA_1);
@@ -780,6 +789,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             modificoDireccion = true;
         }
 
+        
         //// Actualizacion de mascara en base a avionA_1 x y
         ////Nota: aunque el movimiento de la avion de saque para eventos de boton, esta actualizacion se tiene que hacer constantemente en el update debido a la velocidad del avion (incersia)
         if (isAvionActivaAliadaViva) {
@@ -860,9 +870,18 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         }
 
-        avionA_activa = this.avionA_1;
-        //////DETECTAR SI SE QUEDA SIN NAFTA EXPLOTA
-        hayCombutible(avionA_activa);
+        
+
+        if (this.avionA_1.vida > 0) {
+            avionA_activa = this.avionA_1;
+            //////DETECTAR SI SE QUEDA SIN NAFTA EXPLOTA
+            //hayCombutible(avionA_activa);
+        }else{
+            avionA_activa.body.enable = false;
+        }
+
+
+
     }////CIERRE UPDATE
     
     
@@ -900,16 +919,17 @@ function escuchaDeKeyDownSwitch(event){
 }
 
 function hayCombutible(avion){
-    if (avion.cantCombustible<=0){
+    if ( (avion.cantCombustible <= 0) && isAvionActivaAliadaViva){
+        isAvionActivaAliadaViva = false;
+        avion.body.enable = false;
         ////CAMBIAR AVION 
         ////CAMBIAR FLAG PARA QUE LA SOMBRA QUEDE EN LA BASE
-        isAvionActivaAliadaViva = false;
-    /// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
+        /// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
         Gpo_AvionesAliados.killAndHide(avion);
-        avion.body.enable = false;
-        boom = sceneJuego.add.sprite(avion.x, avion.y, 'explosion');
-        boom.anims.play('explode');
-        snd_explosion.play()
+        
+        boom3 = sceneJuego.add.sprite(avion.x, avion.y, 'explosion');
+        boom3.anims.play('explode');
+        snd_explosion.play();
     }
 }
 
@@ -1023,20 +1043,22 @@ function setDescuentoCombustibleAvionUPDATE(num, avion){
         avion.cantCombustible = avion.cantCombustible - avion.unidadDeConsumoCombustible;
     } else {
         ////EVENTO DE DESTRUCCION/caida POR FALTA DE COMBUSTIBLE
+        hayCombutible(avion);
+        
     }
 
 }
 
 function getunidadDeConsumoCombustible(num, avion){
-    avion.unidadDeConsumoCombustible = 1;
+    avion.unidadDeConsumoCombustible = num;
     if (avion.tieneBomba) {
-        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1 ;
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num ;
     }
     if(avion.z > 100){ ///altura maxima
-        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1;
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num;
     }
     if (modificoDireccion) {
-        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + 1;
+        avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num;
     }
 }
 
@@ -1114,6 +1136,7 @@ function impactoBalaEnElementoBaseA(elem_base,bala){
     bala.kill();
     if (elem_base.vida <= 0){
     //  console.log(artillero.vida);
+        elem_base.body.enable = false;
         boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
@@ -1132,6 +1155,7 @@ function impactoBalaEnElementoBaseE(elem_base,bala){
     bala.kill();
     if (elem_base.vida <= 0){
     //  console.log(artillero.vida);
+        elem_base.body.enable = false;
         boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
@@ -1151,6 +1175,7 @@ function impactoBalaEnElementoBaseE(elem_base,bala){
     bala.kill();
     if (artillero.vida <= 0){
     //  console.log(artillero.vida);
+        artillero.body.enable = false;
         boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
@@ -1169,6 +1194,7 @@ function impactoBalaEnArtilleroE(artillero,bala){
     bala.kill();
     if (artillero.vida <= 0){
     //  console.log(artillero.vida);
+        artillero.body.enable = false;
         boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
@@ -1243,6 +1269,7 @@ function impactoBalaEnAvionA(avion, bala ){
     bala.kill();
     if (avion.vida <= 0){
     //  console.log(avion.vida);
+        avion.body.enable = false;
         boom = this.add.sprite(avion.x, avion.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
@@ -1261,6 +1288,7 @@ function impactoBalaEnAvionE(avion, bala ){
     bala.kill();
     if (avion.vida <= 0){
     //  console.log(avion.vida);
+        avion.body.enable = false;
         boom = this.add.sprite(avion.x, avion.y, 'explosion');
         boom.anims.play('explode');
         snd_explosion.play();
