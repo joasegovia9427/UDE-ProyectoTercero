@@ -1,3 +1,5 @@
+/////----------------version del archivo numero::       ---- ultimo modificador:: joaquin---
+
 /////-----------------INICIO VARIABLES GLOBALES--------------------
 var sceneJuego;
 
@@ -86,7 +88,7 @@ var line;
 var gfx;
 
 // efectos y sonidos
-var boom;
+var boom, boom2;
 var explotar;
 var snd_metralleta;
 var snd_impacto_metralleta;
@@ -98,6 +100,13 @@ var avionActivaUltimaVX = 0;
 var avionActivaUTlimaVY = 0;
 
 var modificoDireccion = false;
+
+var avionActivaAliadaX = 0;
+var avionActivaAliadaY = 0;
+
+var isAvionActivaAliadaViva = true;
+
+var tiempoDelUpdate = 0;
 
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
 
@@ -179,8 +188,14 @@ export default class s7_campoBatalla extends Phaser.Scene {
         ////------------MUSICA y SONIDOS INICIO----------------------------------
         
         this.load.audio('snd_disparo_metralleta', "./assets/sounds/metralleta.m4a");
-        this.load.audio('snd_impacto_metralleta', "./assets/sounds/impactometralleta.mp3");
-        this.load.audio('sonidoexplosion', './assets/sounds//explosion.mp3');
+        this.load.audio('snd_impacto_metralleta', "./assets/sounds/impactoMetralleta.m4a");
+        this.load.audio('sonidoexplosion', './assets/sounds/explosion.m4a');
+        this.load.audio('caidaYExplosionBomba', './assets/sounds/caidaYExplosionBomba.m4a');
+
+        ///PONER IF PARA QUE CARGUE UNA U OTRA
+/*         this.load.audio('musicaFondo1', './assets/sounds/musicaFondo1.m4a');
+        this.load.audio('musicaFondo2', './assets/sounds/musicaFondo2.m4a');
+        this.load.audio('musicaFondo3', './assets/sounds/musicaFondo3.m4a'); */
         ////------------MUSICA y SONIDOS FIN----------------------------------
     } ////CIERRE PRELOAD
 
@@ -537,7 +552,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             runChildUpdate: true
         });
         this.avionE_1.bullets_avion_Enemigo.physicsBodyType = Phaser.Physics.ARCADE; 
-        this.avionE_1.setVelocity(0,150);
+        this.avionE_1.setVelocity(-150,0);
         //cantidadAvionesAliadas = arrayAvionesEnemigas.push(this.avionE_1);
         this.avionE_1.physicsBodyType = Phaser.Physics.ARCADE;
         Gpo_AvionesEnemigos.add(this.avionE_1);
@@ -733,8 +748,40 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         //// Actualizacion de mascara en base a avionA_1 x y
         ////Nota: aunque el movimiento de la avion de saque para eventos de boton, esta actualizacion se tiene que hacer constantemente en el update debido a la velocidad del avion (incersia)
-        spotlight.x = this.avionA_1.x;
-        spotlight.y = this.avionA_1.y+2;
+        if (isAvionActivaAliadaViva) {
+            spotlight.x = this.avionA_1.x;
+            spotlight.y = this.avionA_1.y+2;
+
+            //// ACTUALIZAR TEXTO DE TABLERO AVION:
+            tableroAvion.setText([
+                'DATOS AVION:',
+    /*           'x: ' + this.avionA_1.body.speed,
+                'y: ' + this.avionA_1.y, */
+                'Altura: ' + this.avionA_1.z,
+                'Bomba: ' + this.avionA_1.tieneBomba,
+                'Vida: ' + this.avionA_1.vida,
+                'Combustible: ' + this.avionA_1.cantCombustible,
+            ]);
+
+        } else {
+            spotlight.x = mi_base_x;
+            spotlight.y = mi_base_y;
+
+            if (Gpo_AvionesAliados.length > 0) {
+                //// ACTUALIZAR TEXTO DE TABLERO AVION:
+                tableroAvion.setText([
+                    'SELECCIONA UNA NUEVA AVION',
+                ]);
+            } else {
+                //// ACTUALIZAR TEXTO DE TABLERO AVION:
+                tableroAvion.setText([
+                    'NO HAY MAS AVIONES ALIADAS',
+                    '¡¡¡PERDISTE!!',
+                ]);
+            }
+
+        }
+        
 
 
         ////descuento de combustible
@@ -746,16 +793,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
 
-        //// ACTUALIZAR TEXTO DE TABLERO AVION:
-        tableroAvion.setText([
-            'DATOS AVION:',
-  /*           'x: ' + this.avionA_1.body.speed,
-            'y: ' + this.avionA_1.y, */
-            'Altura: ' + this.avionA_1.z,
-            'Bomba: ' + this.avionA_1.tieneBomba,
-            'Vida: ' + this.avionA_1.vida,
-            'Combustible: ' + this.avionA_1.cantCombustible,
-        ]);
+
           //// ACTUALIZAR TEXTO DE TABLERO BASE:
           tableroBase.setText([
             'DATOS BASE:',
@@ -774,9 +812,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
         //////DETECTAR SI AVIONES ENEMIGAS PASAN SOBRE LA TORRE
         hayEnemigoEnRangoTorreDeControl(time);
 
-        /////DISPARO AVION
-        if ((this.disparoAvion.isDown) && (time > this.avionA_1.lastFiredAvion)){
-            evento_avion_disparo(time, this.avionA_1);
+
+        tiempoDelUpdate = time;
+        if (isAvionActivaAliadaViva) {
+            /////DISPARO AVION
+            if ((this.disparoAvion.isDown) && (time > this.avionA_1.lastFiredAvion)){
+                evento_avion_disparo(time, this.avionA_1);
+            }
         }
 
         this.avionA_activa = this.avionA_1;
@@ -812,11 +854,17 @@ function escuchaDeKeyDownSwitch(event){
             evento_tecla_avionAltura2();
             break;
         case Phaser.Input.Keyboard.KeyCodes.SPACE:
-            
+            evento_tecla_avionDisparar();
             break;
       }
 
 }
+
+function evento_tecla_avionDisparar(){
+
+}
+
+
 
 function evento_tecla_avionAltura0(){
 
@@ -1098,7 +1146,7 @@ function impactoBalaEnAvionA(avion, bala ){
             snd_explosion.play();
             Gpo_AvionesAliados.killAndHide(avion);
            // Gpo_AvionesEnemigos.killAndHide(avion);        
-
+           avion.body.enable = false;
         } 
 } 
 function impactoBalaEnAvionE(avion, bala ){
@@ -1115,32 +1163,51 @@ function impactoBalaEnAvionE(avion, bala ){
         boom.anims.play('explode');
         snd_explosion.play();
         Gpo_AvionesEnemigos.killAndHide(avion);
-        //Gpo_AvionesEnemigos.killAndHide(avion);        
-
+        //Gpo_AvionesEnemigos.killAndHide(avion);      
+        avion.body.enable = false;
     } 
 } 
 
 function choqueAviones(avion1,avion2){
     if (avion1.z == avion2.z){
-/// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
-    Gpo_AvionesAliados.killAndHide(avion1);
-    Gpo_AvionesEnemigos.killAndHide(avion2);
-/*     avion1.disableBody(true, true);
-    avion2.disableBody(true, true);
-    avion1.setActive(false);
-    avion2.setActive(false); */
-    /// MOVEMOS LOS AVIONES ALIADOS A CAMPO ALIADO Y LOS ENEMIGOS A CAMPO ENEMIGO POR SOMBRAS???
-    // sacamos el spotlight para afuera del tablero..
-  /*   spotlight.x=baseAliada_x;
-    spotlight.y=baseAliada_y; */
-    boom = this.add.sprite(avion1.x, avion1.y, 'explosion');
-    boom.anims.play('explode');
-	snd_explosion.play()
-    /// habria que deshabilitar spotlight y habilitarlo cada vez que se activa un avion.
-    /// si no hay aviones deberiamos dejar revelado el tablero y dar por terminada la partida.
+
+        ////CAMBIAR AVION 
+        
+        ////CAMBIAR FLAG PARA QUE LA SOMBRA QUEDE EN LA BASE
+        isAvionActivaAliadaViva = false;
+
+
+        avion1.body.ensable = false;
+        avion2.body.enable = false;
+    /// PARA ELIMINAR UN SPRITE, SI PERTENECE A UN GRUPO HAY QUE HACERLO ASI...
+        Gpo_AvionesAliados.killAndHide(avion1);
+        Gpo_AvionesEnemigos.killAndHide(avion2);
+    /*     avion1.disableBody(true, true);
+        avion2.disableBody(true, true);
+        avion1.setActive(false);
+        avion2.setActive(false); */
+        /// MOVEMOS LOS AVIONES ALIADOS A CAMPO ALIADO Y LOS ENEMIGOS A CAMPO ENEMIGO POR SOMBRAS???
+        // sacamos el spotlight para afuera del tablero..
+    /*   spotlight.x=baseAliada_x;
+        spotlight.y=baseAliada_y; */
+        boom = this.add.sprite(avion1.x, avion1.y, 'explosion');
+        boom2 = this.add.sprite(avion2.x, avion2.y, 'explosion');
+        boom.anims.play('explode');
+        boom2.anims.play('explode');
+        snd_explosion.play()
+        /// habria que deshabilitar spotlight y habilitarlo cada vez que se activa un avion.
+        /// si no hay aviones deberiamos dejar revelado el tablero y dar por terminada la partida.
 }
 
 }
+
+function seleccionProximaAvionAliadoActiva(){
+
+
+
+}
+
+
 
 function artilleroOnCollide(artillero, objeto2){
 
