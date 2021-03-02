@@ -1,4 +1,4 @@
-/////----------------version del archivo numero::       ---- ultimo modificador:: joaquin---
+/////----------------version del archivo numero::  2021 03 01 a  ---- ultimo modificador:: joaquin---
 
 /////-----------------INICIO VARIABLES GLOBALES--------------------
 var sceneJuego;
