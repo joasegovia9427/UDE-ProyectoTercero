@@ -26,6 +26,8 @@ var cantidadAvionesEnemigas     = 0;
 var cantidadArtillerosAliadas   = 0;
 var cantidadArtillerosEnemigas  = 0; 
 
+var pausar=false;
+
 /* var arrayAvionesAliadas      = [];
 var arrayAvionesEnemigas        = [];
 var arrayArtillerosAliados      = [];
@@ -85,6 +87,7 @@ var tweenBombaE;
 
 // ELEMENTOS
 var avionAliada_Activa;
+var avionActivaAliadaLateral;
 var avionEnemiga_Activa;
 
 var avionA_1;
@@ -448,6 +451,17 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.load.image("artillero_negro_activo","./assets/images/objetos/artillero_negro_activo.png");
         this.load.image("artillero_rojo_activo","./assets/images/objetos/artillero_rojo_activo.png");
 
+        /// IMAGENES PARA VISTA LATERAL
+        this.load.image("pisoLateral","./assets/images/texturas/pisoLateral.png");
+        this.load.image("avionNegroLateral","./assets/images/objetos/airplane_3.png");
+        this.load.image("avionNegroLateralActivo","./assets/images/objetos/airplane_3.png");
+        this.load.image("avionRojoLateral","./assets/images/objetos/airplane_3.png");
+        this.load.image("avionRojoLateralActivo","./assets/images/objetos/airplane_3.png");
+       
+        this.load.image("torreControl_rojoLateral","./assets/images/objetos/torreControl_VLateral_roja_activa.png");
+        this.load.image("torreControl_rojoLateralActivo","./assets/images/objetos/torreControl_VLateral_roja_activa.png");
+        this.load.image("torreControl_negroLateral","./assets/images/objetos/torreControl_VLateral_negra.png");
+        this.load.image("torreControl_negroLateralActivo","./assets/images/objetos/torreControl_VLateral_negra_activa.png");
         //balas
         this.load.image("bala", "./assets/images/objetos/bala.png");
 
@@ -891,7 +905,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.disparoAvion = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
         this.disparoAvionBomba = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B);
 
-        this.avionAutoDestruccion = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.avionAutoDestruccion = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.N);
 
         this.flecha_right  = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
         this.flecha_left   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
@@ -901,6 +915,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.superKill     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
         this.superBorn     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
         
+		this.teclaPausa = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.teclaReanudar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
         /// LAS BOMBAS SE DIBUJAN AQUI POR ORDEN DE CREACION DE IMAGENES
         /// BOMBA ALIADA Y ENEMIGA
         bombaBulletA = this.physics.add.image(3000,0,"bala");
@@ -983,6 +999,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
         isContinuarUpdate = true;
 
         
+        /// VISTA LATERAL CARGO IMAGENES CORRESPONDIENTES
+
+        cargaElementosVistaLateral();
     }////CIERRE CREATE
     ////////////////---------------------------------------------------------------------------------------
     /////////////////-------------------------FIN CREATE -----------------------------------
@@ -1069,7 +1088,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
                 setVelocidadAvion(avionAliada_Activa, vX, vY);
                 modificoDireccion = true;
-
+                var cursors = this.input.keyboard.createCursorKeys();
+                var duration = this.cursors.getDuration();
+                console.log(this.duration);
+                
                /*  if (ultimaTeclaPresionada != ultimaTeclaPresionadaAux) {
                     ultimaTeclaPresionadaAux = ultimaTeclaPresionada;
                     sendDatosWebSocket();
@@ -1192,10 +1214,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
     /////////////////---------------------------------------------------------------------------------------
 
 
-
 }////CIERRE CLASS
-
-
 
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------------------INICIO eventos teclas-----------------------------------
@@ -1231,8 +1250,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
             case Phaser.Input.Keyboard.KeyCodes.B:
                 evento_tecla_avionDispararBomba();
                 break; 
-            case Phaser.Input.Keyboard.KeyCodes.P:
+            case Phaser.Input.Keyboard.KeyCodes.N:
                 evento_tecla_autodestruccion();
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.P:
+                console.log("Aprete la P");
+                pausarJuego();
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.R:
+                reanudarJuego();
                 break;
         }
     }
@@ -2231,3 +2257,84 @@ export default class s7_campoBatalla extends Phaser.Scene {
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------FIN Eventos OVERLAP----------------------------------
 /////////////////---------------------------------------------------------------------------------------
+
+function cargaElementosVistaLateral(){
+    //VISTA LATERAL
+    sceneJuego.pisoLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'pisoLateral');
+    sceneJuego.pisoLateral.setDepth(100);
+    sceneJuego.pisoLateral.setVisible(false);
+    sceneJuego.pisoLateral.displayWidth    = campoAliado_w;
+    sceneJuego.pisoLateral.displayHeight   = campoAliado_h+campoEnemigo_h;
+    avionActivaAliadaLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'avionNegroLateral');
+    avionActivaAliadaLateral.setVisible(false);
+    avionActivaAliadaLateral.setDepth(100);
+    sceneJuego.torreControlAliada = sceneJuego.add.image(0, ((campoAliado_h+campoEnemigo_h)/2), 'torreControl_negroLateral');
+    sceneJuego.torreControlAliada.setDepth(100);
+}
+
+function reanudarJuego ()
+{
+	if (pausar)
+	{
+		pausar = false;
+		/* sonidoReanudar.play();
+		opvReanudar();	
+		musicaFondo.play();*/
+		
+		sceneJuego.pisoLateral.setVisible(false);
+        avionActivaAliadaLateral.setVisible(false);
+        sceneJuego.torreControlAliada.setVisible(false);
+	}
+	if (!pausar){
+		// ALGO
+	
+	}	 
+	
+}
+function pausarJuego ()
+{
+	if (!pausar){
+    
+        pausar = true;
+        /// sonidoPausa.play(); --> REPORDUZCO SONIDO
+        // opvPausa(); --> SEND JSON
+    }
+	if (pausar){
+            // DETENGO CUALQUIER SONIDO QUE ESTE CORRIENDO EN EL JUEGO
+			// DETENGO MUSICA DE FONDO --> musicaFondo.stop();
+			
+            // AVISO EN PANTALLA
+            tableroAvion.setText([
+                'PARTIDA PAUSADA ',
+            ]);
+            //Muestra Vista Lateral
+			sceneJuego.pisoLateral.setVisible(true);
+            avionActivaAliadaLateral.setVisible(true);
+            sceneJuego.torreControlAliada.setVisible(true);
+            
+            var sgm_pantalla = (campoAliado_h+campoEnemigo_h)/3;
+            switch (avionAliada_Activa.z){
+                case 0:
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-70;
+                    avionActivaAliadaLateral.scaleX=0.8;
+                    avionActivaAliadaLateral.scaleY=0.8;
+                    break;
+                case 100:
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-300;
+                    avionActivaAliadaLateral.scaleX=0.5;
+                    avionActivaAliadaLateral.scaleY=0.5;
+                    break;
+                case 200:
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-500;
+                    avionActivaAliadaLateral.scaleX=0.3;
+                    avionActivaAliadaLateral.scaleY=0.3;
+                    break;
+            }			
+            avionActivaAliadaLateral.x = 200;
+            /// DIBUJAR LOS ELEMENTOS DE LA BASE.
+            sceneJuego.torreControlAliada.x=200;
+            sceneJuego.torreControlAliada.y=(campoAliado_h+campoEnemigo_h)-70;
+	}else{
+        sceneJuego.pisoLateral.setVisible(false);
+    }
+}
