@@ -1,25 +1,8 @@
 /////// CREACION DE VARIABLES
 
-var juegoPrincipal;
-var isWSOpen = "true";
-var partidaID = Math.round(Math.random() * 9999); ////got by previous html...
-  
+////var juegoPrincipal;
 
-
-
-
-////CREACION WEBSOCKET
-
-
-
-
-///// METODOS WEBSOCKETS
-
-
-
-
-///// METODOS EVENTOS DE NAVEGADOR Y PESTAÑA
-
+////
 
 
 
@@ -66,3 +49,8 @@ const config = {
 };
 
 var game = new Phaser.Game(config);
+
+
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------

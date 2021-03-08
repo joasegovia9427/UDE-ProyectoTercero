@@ -62,7 +62,7 @@ public class WebSocketPartida {
     
     @OnMessage
     public void onMsg(String in_DatosJSON, Session in_Session) throws JSONException {
-    	msgConsola("$$$$$$$$ Entro al @OnMessage onMsg(String in_DatosJSON, Session in_Session) throws JSONException");
+    	msgConsola("$$$$$$$$ Entro al @OnMessage onMsg(String in_DatosJSON, Session in_Session)");
     	msgConsola("		DATOS DE ENTRADA:: ");
     	msgConsola("		in_Session.getId()::" + in_Session.getId());
     	msgConsola("		in_DatosJSON::" + in_DatosJSON);
@@ -121,16 +121,16 @@ public class WebSocketPartida {
 		        		jsonDataObject.put("sessionId", in_sessionId);
 		        		
 						
-						for (int c = 0; c <= 10; c++) {
-			        		jsonDataObject.put("contador", c);
-			        		
+//						for (int c = 0; c <= 10; c++) {
+//			        		jsonDataObject.put("contador", c);
+//			        		
 							////retorno mi JSON a mi in_Session
 							textoRespuestaJson = jsonDataObject.toString();
 							msgConsola("textoRespuestaJson::"+textoRespuestaJson);
-	
+							///si entre por primera vez a mi mismo me mando mis datos para confirmar y para que guarde mi sessID
 							in_Session.getBasicRemote().sendText(textoRespuestaJson);
-			                Thread.sleep(100);
-			            }
+//			                Thread.sleep(100);
+//			            }
 						
 					} else {
 		    			////Si esta, entonces busco esa partida por el id y obtengo su lista de sessiones
@@ -163,17 +163,17 @@ public class WebSocketPartida {
 							jsonDataObject.put("sessionId", in_sessionId);
 							
 							
-							for (int c = 0; c <= 10; c++) {
-				        		jsonDataObject.put("contador", c);
-				        		
+//							for (int c = 0; c <= 10; c++) {
+//				        		jsonDataObject.put("contador", c);
+//				        		
 								////retorno mi JSON a mi in_Session
 								textoRespuestaJson = jsonDataObject.toString();
 								msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 	
 								in_Session.getBasicRemote().sendText(textoRespuestaJson);
 								
-				                Thread.sleep(100);
-				            }
+//				                Thread.sleep(100);
+//				            }
 							
 						}
 					}
@@ -193,20 +193,20 @@ public class WebSocketPartida {
 		    	    	if ( !sessionActual.getId().equals(in_sessionId) ) { ////si la sesion en la que me paro NO es igual a la que entra, le mando mis datos
 		    	    		msgConsola("enviar a sessionActual::"+sessionActual.getId());
 						
-							jsonDataObject.put("sessionId", sessionActual.getId()); //in_sessionId);
+							jsonDataObject.put("sessionId", in_sessionId);// sessionActual.getId()); 
 		    	    		
-		    	    		for (int c = 0; c <= 10; c++) {
-		    	    			
-				        		jsonDataObject.put("contador", c);
-				        		
+//		    	    		for (int c = 0; c <= 10; c++) {
+//		    	    			
+//				        		jsonDataObject.put("contador", c);
+//				        		
 								////retorno mi JSON a mi in_Session
 								textoRespuestaJson = jsonDataObject.toString();
 								msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 	
 								sessionActual.getBasicRemote().sendText(textoRespuestaJson);
 								
-				                Thread.sleep(100);
-				            }
+//				                Thread.sleep(100);
+//				            }
 		    	    		
 		    	    		
 						}
@@ -222,7 +222,7 @@ public class WebSocketPartida {
 			 msgConsola("catch (Exception e)::"+ e.getMessage());
 		}
 
-        msgConsola("$$$$$$$$ Salio del @OnMessage void onMsg(String in_DatosJSON, Session in_Session) throws JSONException");
+        msgConsola("$$$$$$$$ Salio del @OnMessage void onMsg(String in_DatosJSON, Session in_Session)");
         msgConsolaEspacios();
         
         

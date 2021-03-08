@@ -1,9 +1,12 @@
-/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 07b  ---- ultimo modificador:: Joaquin---
+/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 08a  ---- ultimo modificador:: Joaquin--- con intento de espejado ---
+
+
 
 /////-----------------INICIO VARIABLES GLOBALES--------------------
 var sceneJuego;
 
 var ultimaTeclaPresionada;
+var ultimaTeclaPresionadaAux;
 var spotlight;
 var spotlight_instance;
 
@@ -157,7 +160,240 @@ var mostrarAlert = true;
 
 var superOne, isSuperAlive = false, cantSuper = 0;
 
+
+
+var in_avionEnemigaActivaX, in_avionEnemigaActivaY;
+
+var isTrajoDatosEnemigos = false;
+var in_avionEnemiga_ActivaVx;
+var in_avionEnemiga_ActivaVy;
+var avionEnemiga_ActivaVx;
+var avionEnemiga_ActivaVy;
+var avionAliada_ActivaVx;
+var avionAliada_ActivaVy;
+
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
+
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------
+////CREACION WEBSOCKET
+var webSocket = new WebSocket("ws://localhost:8080/prueba/webSocketEndPointPartida");
+webSocket.onmessage = onMessage;
+
+var partidaID = "1234"//Math.round(Math.random() * 9999); ////got by previous html...
+var isIngresoPorPrimeraVez = true; ////luego de conectar esto ya se me actualiza a false desde dentro del server
+var isWSOpen = "true";
+var mi_SessId = "mi_sessIdToChange";  ////luego de conectar esto ya se me actualiza  desde dentro del server
+var contrincante_SessId = "contrincante_sessIdToChange";  ////luego del primer onMessage enemigo esto ya se me actualiza desde dentro del server
+var rows;
+var dataJson;
+var datosRecibidosDesdeJugadorNumero;
+
+var jugadorMiNumero = 0;
+
+///// METODOS WEBSOCKETS
+webSocket.onopen = function(event) {
+    var numRandomAux = Math.round(Math.random() * 10);
+    if (numRandomAux > 5) {
+        jugadorMiNumero = 1;
+    } else {
+        jugadorMiNumero = 2;
+    }
+    console.log("Me toco ser el jugadorMiNumero::"+ jugadorMiNumero);
+
+    console.log("WebSocket is open now.");
+    isWSOpen = "true"; 
+
+    rows =
+    { "partidaId": partidaID
+    , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+    , "sessionId": mi_SessId
+    , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+    //, "arreLista" : [lista, lista2]
+    };
+
+    dataJson = JSON.stringify(rows);
+    if (isWSOpen) {
+        webSocket.send(dataJson);
+    }
+};
+
+webSocket.onclose = function(event) {
+    webSocket.send("dato a enviar de cierre del websocket");
+    isWSOpen = "false";
+
+    console.log("WebSocket is closed now.");
+    console.log('Onclose called' + event);
+    console.log('code is' + event.code);
+    console.log('reason is ' + event.reason);
+    console.log('wasClean  is' + event.wasClean);
+};
+
+webSocket.onerror = function(event) {
+    alert("Error con el WebSocket ***Verifique que el server este prendido: " + event, event );
+}; 
+
+///// METODOS EVENTOS DE NAVEGADOR Y PESTAÑA
+window.addEventListener('beforeunload', function (e) {   
+    isWSOpen = "false";
+    webSocket.send("dato a mandar como que cerre pestaña");
+    
+    // Cancel the event
+    e.preventDefault(); // If you prevent default behavior in Mozilla Firefox prompt will always be shown
+    // Chrome requires returnValue to be set
+    e.returnValue = '';
+
+    // the absence of a returnValue property on the event will guarantee the browser unload happens
+    delete e['returnValue']; 
+    
+  } 
+  
+); 
+
+function onMessage(event) {
+    console.log("-------function onMessage(event)---------------------------");
+    ////todos los datos que me manda tanto el server por primera vez, 
+    //// como todo el resto de datos que me manda el enemigo para actualizar sus objetos y eventos
+    
+    console.log("event.data:"+event.data);
+    var data = JSON.parse(event.data);
+    console.log("data:"+data);
+
+    datosRecibidosDesdeJugadorNumero = data.enviaDatoDesdeElJugadorNum;
+    console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
+
+    if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
+        ////sincronizo mis datos
+        isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
+        console.log("isIngresoPorPrimeraVez: "+isIngresoPorPrimeraVez);
+        if ( (data.sessionId != mi_SessId) && (mi_SessId != "mi_sessIdToChange") ) {
+            console.log("algo raro paso, entro con el mismo numero de juego y ademas que no entro por primera vez, o sea entro posterior, y ademas con diferente sessID");
+            console.log("data.sessionId::"+data.sessionId);
+            console.log("mi_SessId previa::"+mi_SessId);
+        }
+        mi_SessId = data.sessionId;
+        console.log("mi_SessId: "+mi_SessId);
+
+
+        rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            //, "arreLista" : [lista, lista2]
+            };
+ 
+    } else {
+        ////sino, me estan llegando datos del enemigo...
+        //// sincronizo los datos de los elementos enemigos
+        isTrajoDatosEnemigos = true;
+
+        contrincante_SessId = data.sessionId;
+        //console.log("contrincante_SessId: "+contrincante_SessId);
+
+        x = data.avionActivaX;
+        y = data.avionActivaY;
+
+        console.log("x y :::"+ x + " -- " + y)
+
+        in_avionEnemigaActivaX = (1000 - x);
+        in_avionEnemigaActivaY = (600 - y);
+        
+        //console.log("in_avionEnemigaActiva x y :::"+ in_avionEnemigaActivaX + " -- " + in_avionEnemigaActivaY)
+
+
+        x = data.avionActivaVx;
+        y = data.avionActivaVY;
+        //console.log("Vx Vy :::"+ x + " -- " + y)
+
+        in_avionEnemiga_ActivaVx = (x*-1);
+        in_avionEnemiga_ActivaVy = (y*-1);
+        
+        //console.log("in_avionEnemigaActiva Vx Vy :::"+ in_avionEnemiga_ActivaVx + " -- " + in_avionEnemiga_ActivaVy)
+        
+        avionEnemiga_Activa.resetFlip();
+
+        x = data.avionActivaAngulo;
+        y = (x*-1);
+        avionEnemiga_Activa.angle = y;  
+        
+        if (y==0) {
+            x = data.avionActivaFlipX;        
+            avionEnemiga_Activa.flipX = !x; 
+        }
+
+        avionEnemiga_Activa.x = in_avionEnemigaActivaX;
+        avionEnemiga_Activa.y = in_avionEnemigaActivaY;
+        avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
+        avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
+        setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
+
+    
+   
+    }
+
+
+
+ }
+ 
+function sendDatosWebSocket(){
+
+    rows =
+    { "partidaId": partidaID
+    , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+    , "sessionId": mi_SessId
+    , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+    , "avionActivaX": avionAliada_Activa.x
+    , "avionActivaY": avionAliada_Activa.y
+    , "avionActivaVx": avionAliada_ActivaVx
+    , "avionActivaVY": avionAliada_ActivaVy
+    , "avionActivaAngulo": avionAliada_Activa.angle
+    , "avionActivaFlipX": avionAliada_Activa.flipX
+    //, "arreLista" : [lista, lista2]
+    };
+    dataJson = JSON.stringify(rows);
+    if (isWSOpen) {
+        console.log("dataJson::"+dataJson);
+        webSocket.send(dataJson);
+    }
+
+
+}
+
+/*  ////EJEMPLO DE COMO HACER UN SEND AL WebSocket
+var lista = 
+{ "subitem": "subitem1"
+, "texto": "texto2"
+};
+var lista2 = 
+{ "subitem": "subitem2"
+, "texto": "texto2"
+};
+
+var rows =
+{ "partidaId": partidanumero
+, "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+, "sessionId": sessIdToChange
+//, "arreLista" : [lista, lista2]
+};
+
+var dataJson = JSON.stringify(rows);
+
+    if (isWSOpen) {
+        webSocket.send(dataJson);
+    }
+ 
+ */
+
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------
+/////----------------------------------------------------------------------------------
+
+
+
+
+
 
 export default class s7_campoBatalla extends Phaser.Scene {
     constructor() {
@@ -256,6 +492,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
     /////////////////-------------------------INICIO CREATE -----------------------------------
     /////////////////-----------------------------------------------------------------------------------
     create() {
+
+
+
+
         sceneJuego = this;
         //juego_var_sceneJuego = this;
         // SONIDOS
@@ -615,7 +855,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         /// APLICO SOMBRA A AQUELLO QUE QUIERA ENMASCARAR: ARTILLEROS, ELEMENTOS DE BASE+AVIONES
 
-        avionEnemiga_Activa.mask = spotlight_instance;
+/*         avionEnemiga_Activa.mask = spotlight_instance;
         this.pisoEnemigo.mask = spotlight_instance;
         artilleroE_1.mask = spotlight_instance;
         artilleroE_2.mask = spotlight_instance;
@@ -627,7 +867,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.pistaAvionesEnemiga.mask = spotlight_instance;
         this.deposito_bombasEnemigo.mask = spotlight_instance;
         this.deposito_combustibleEnemigo.mask = spotlight_instance;
-
+ */
 
         ///aplico a los elementos enemigos
 
@@ -741,6 +981,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         });
 
         isContinuarUpdate = true;
+
+        
     }////CIERRE CREATE
     ////////////////---------------------------------------------------------------------------------------
     /////////////////-------------------------FIN CREATE -----------------------------------
@@ -755,7 +997,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         isContinuarUpdate = validarCondicionesPartidaAliada();
         if (isContinuarUpdate) {
-            
+
+
+
+
+
             ///// MOVIMIENTO DE AVION EN BASE A BOTONES
             ////LUEGO SACAR FISICAS PARA FUERA DEL IF DE BOTONES... ya que por mas que no muevas tu avion, tiene que recalcular en base al websockets los eventosasd
 
@@ -818,9 +1064,22 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     vY = 10;
                 }
                 
+                avionAliada_ActivaVx = vX;
+                avionAliada_ActivaVy = vY;
+
                 setVelocidadAvion(avionAliada_Activa, vX, vY);
                 modificoDireccion = true;
+
+               /*  if (ultimaTeclaPresionada != ultimaTeclaPresionadaAux) {
+                    ultimaTeclaPresionadaAux = ultimaTeclaPresionada;
+                    sendDatosWebSocket();
+                } */
+                
+
+
             } ////FIN IF DE BOTONES DE DIRECCION
+            
+
 
 
             //// Actualizacion de mascara en base a avionAliada_Activa x y
@@ -846,7 +1105,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }
             
             /////---------FISICAS DE AVIONES y BALAS ENEMIGAS------
-            setMaksAvion(avionEnemiga_Activa);
+////////////setMaksAvion(avionEnemiga_Activa);
 
             //// ACTUALIZAR TEXTO DE TABLERO BASE:
             tableroBase.setText([
@@ -978,16 +1237,16 @@ export default class s7_campoBatalla extends Phaser.Scene {
         }
     }
     function evento_tecla_avionDireccion_D(){
-
+        sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_A(){
-
+        sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_W(){
-
+        sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_S(){
-
+        sendDatosWebSocket();
     }
 
     function evento_tecla_avionAltura0(){
@@ -1052,6 +1311,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
     function evento_tecla_autodestruccion(){
         isAvionActivaAliadaViva = false;
         setDestroyAvionAndGetNewActive(avionAliada_Activa, Gpo_AvionesAliados);
+        
     }
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------------------FIN eventos teclas-----------------------------------
@@ -1479,7 +1739,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         avion.angle = 0;
         avion.tieneBomba = true;
         avion.cantBombas = 1;
-        avion.cantCombustible = 10000;
+        avion.cantCombustible = 9910000;
         avion.unidadDeVelocidad = 0;
         avion.unidadDeConsumoCombustible = 0;
         avion.isAvionEnCampoEnemigo = false;
