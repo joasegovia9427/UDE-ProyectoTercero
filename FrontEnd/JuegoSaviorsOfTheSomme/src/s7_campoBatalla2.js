@@ -124,7 +124,7 @@ var StringToExecute;
 // efectos
 
 var avionActivaUltimaVX = 0;
-var avionActivaUTlimaVY = 0;
+var avionActivaUltimaVY = 0;
 
 var modificoDireccion = false;
 
@@ -985,14 +985,15 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         tableroBase.setDepth(4)
 
         /// CREO UN TIMER PARA QUE CADA 15 SEGS MUEVA LOS ARTILLEROS RANDOM.
-        timer = this.time.addEvent({
+        timer = sceneJuego.time.addEvent({
             delay: 15000,   // EN MILI SEGUNDOS
             //callback: callback,
-            callback: moverGrupodeArtilleros,
+            callback: moverGrupodeArtilleros("Enemigo"),
             args: [Gpo_ArtillerosEnemigos.getChildren(),Gpo_AvionesAliados.getChildren()],
             callbackScope: Gpo_ArtillerosEnemigos,
-            loop: true,
+            loop: true
         });
+        
 
         isContinuarUpdate = true;
 
@@ -1296,7 +1297,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
             this.pajaro.z = ;*/
 
         ////Adentro resuelve cambios por altura y bomba
-        setVelocidadAvion(avionEnemiga_Activa, avionEnemigaActivaUltimaVX, avionEnemigaActivaUltimaVY);
+        setVelocidadAvion(avionEnemiga_Activa, avionActivaUltimaVX, avionActivaUltimaVY);
     }
 
     function evento_tecla_avionAltura1(){
@@ -1305,7 +1306,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         avionEnemiga_Activa.scaleY=0.2;
         avionEnemiga_Activa.setDepth(1);
         ////Adentro resuelve cambios por altura y bomba
-        setVelocidadAvion(avionEnemiga_Activa, avionEnemigaActivaUltimaVX, avionEnemigaActivaUltimaVY); 
+        setVelocidadAvion(avionEnemiga_Activa, avionActivaUltimaVX, avionActivaUltimaVY); 
     }
 
     function evento_tecla_avionAltura2(){
@@ -1318,7 +1319,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         ///this.torreta.mask = new Phaser.Display.Masks.BitmapMask(this, spotlightb);
         
         ////Adentro resuelve cambios por altura y bomba
-        setVelocidadAvion(avionEnemiga_Activa, avionEnemigaActivaUltimaVX, avionEnemigaActivaUltimaVY);
+        setVelocidadAvion(avionEnemiga_Activa, avionActivaUltimaVX, avionActivaUltimaVY);
     }
 
     function evento_tecla_avionDisparar(){
@@ -1664,26 +1665,33 @@ function crearArtillero(bando,num){
             artillero.x=Phaser.Math.Between(campoEnemigo_x, campoEnemigo_w);
     } // artillero setear oncollide function with Base
 
-    function moverGrupodeArtilleros(){
-
+    function moverGrupodeArtilleros(bando){
+        var textura;
+        var arrayArtilleros; var arrayAviones;
         /// ACA TENDRIA QUE PASARLE EL GRUPO DE ARTILLEROS Y AVIONES Y DEFINIR UNA TEXTURA PARA QUE FUNCIONE PARA AMBOS
-
-        var arrayArtillerosAliados = Gpo_ArtillerosAliados.getChildren();
-        var arrayAvionesEnemigas = Gpo_AvionesEnemigos.getChildren();
+        if (bando ="Aliado"){
+            arrayArtilleros = Gpo_ArtillerosAliados.getChildren();
+            arrayAviones = Gpo_AvionesEnemigos.getChildren();
+            textura = "artillero_negro";
+        }else{
+            arrayArtilleros = Gpo_ArtillerosAliados.getChildren();
+            arrayAviones = Gpo_AvionesEnemigos.getChildren();
+            textura = "artillero_rojo";
+        }
         //Para cada artillero del array
-        for (i = 0; i < arrayArtillerosAliados.length; i++){
-            if(arrayArtillerosAliados[i].vida > 0){
-                arrayArtillerosAliados[i].HayEnemigo = false;
-                arrayArtillerosAliados[i].setTexture("artillero_negro");
+        for (i = 0; i < arrayArtilleros.length; i++){
+            if(arrayArtilleros[i].vida > 0){
+                arrayArtilleros[i].HayEnemigo = false;
+                arrayArtilleros[i].setTexture(textura);
                 //para cada avion enemiga
-                for (j = 0; j < arrayAvionesEnemigas.length; j++){
-                    if(arrayAvionesEnemigas[j].vida > 0){
-                        if (arrayAvionesEnemigas[j].z < 200){
+                for (j = 0; j < arrayAviones.length; j++){
+                    if(arrayAviones[j].vida > 0){
+                        if (arrayAviones[j].z < 200){
                             //si distancia entre artillero y avion < 100
-                            distanciaEntreDosObjetos = distanceRound(arrayArtillerosAliados[i], arrayAvionesEnemigas[j]); 
-                            rangoMaximoVision = arrayArtillerosAliados[i].rangoVision;
+                            distanciaEntreDosObjetos = distanceRound(arrayArtilleros[i], arrayAviones[j]); 
+                            rangoMaximoVision = arrayArtilleros[i].rangoVision;
                             if (distanciaEntreDosObjetos > rangoMaximoVision) {
-                                moverArtillero(arrayArtillerosAliados[i]);
+                                moverArtillero(arrayArtilleros[i]);
                             }
                         } 
                     }
@@ -1895,11 +1903,11 @@ function crearArtillero(bando,num){
         } 
         if(avion.z <= 100){//baja altura
             avionActivaUltimaVX = velX;
-            avionActivaUTlimaVY = velY;
+            avionActivaUltimaVY = velY;
             avion.setVelocity(velX,velY);
         }else{ //200 es altura
             avionActivaUltimaVX = velX/2;
-            avionActivaUTlimaVY = velY/2;
+            avionActivaUltimaVY = velY/2;
             avion.setVelocity(velX/2,velY/2);
         }
     }
