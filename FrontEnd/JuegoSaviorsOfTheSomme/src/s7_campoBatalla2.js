@@ -886,8 +886,8 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         this.separacionCampos.displayWidth = lineaSeparacion_w;
         this.separacionCampos.displayHeight = lineaSeparacion_h+100; 
         this.separacionCampos.setDepth(50);
-        console.log("x:"+lineaSeparacion_x+" y: "+lineaSeparacion_y);
-        console.log("x:"+lineaSeparacion_w+" y: "+lineaSeparacion_h);
+        //console.log("x:"+lineaSeparacion_x+" y: "+lineaSeparacion_y);
+        //console.log("x:"+lineaSeparacion_w+" y: "+lineaSeparacion_h);
 
         ///// CREACION DE TECLAS
         this.right  = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
@@ -931,8 +931,8 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         //// CREACION DE COLISIONES Y SOLAPAMIENTOS
 
         // OVERLAP UTIL PARA ORDENAMIENTO DE ARTILLEROS EN TABLERO
-        this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ArtillerosAliados, overlapEvent_artilleroOnCollide, null, this);
-        this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ElementosBaseAliada, overlapEvent_artilleroOnCollide, null, this);
+       // this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ArtillerosAliados, overlapEvent_artilleroOnCollide, null, this);
+        //this.physics.add.overlap(Gpo_ArtillerosAliados, Gpo_ElementosBaseAliada, overlapEvent_artilleroOnCollide, null, this);
         this.physics.add.overlap(Gpo_ArtillerosEnemigos, Gpo_ArtillerosEnemigos, overlapEvent_artilleroOnCollide, null, this);
         this.physics.add.overlap(Gpo_ArtillerosEnemigos, Gpo_ElementosBaseEnemiga, overlapEvent_artilleroOnCollide, null, this);
 
@@ -985,15 +985,14 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         tableroBase.setDepth(4)
 
         /// CREO UN TIMER PARA QUE CADA 15 SEGS MUEVA LOS ARTILLEROS RANDOM.
-        timer = sceneJuego.time.addEvent({
+        timer = this.time.addEvent({
             delay: 15000,   // EN MILI SEGUNDOS
             //callback: callback,
-            callback: moverGrupodeArtilleros("Enemigo"),
-            args: [Gpo_ArtillerosEnemigos.getChildren(),Gpo_AvionesAliados.getChildren()],
+            callback: moverGrupodeArtilleros,
+            args: [Gpo_ArtillerosEnemigos.getChildren()],
             callbackScope: Gpo_ArtillerosEnemigos,
-            loop: true
+            loop: true,
         });
-        
 
         isContinuarUpdate = true;
 
@@ -1634,9 +1633,7 @@ function crearArtillero(bando,num){
             mi_base_h = baseAliada_h;
 
             x = Phaser.Math.Between(campoEnemigo_x+50, campoEnemigo_w-50);
-            y = Phaser.Math.Between(campoEnemigo_y+250, (mi_campo_y+campoEnemigo_h-30) ); 
-
-
+            y = Phaser.Math.Between(campoEnemigo_y+250, (mi_campo_y+campoEnemigo_h-30) );
             
         }else{
             mi_campo_x = campoEnemigo_x;
@@ -1665,41 +1662,34 @@ function crearArtillero(bando,num){
             artillero.x=Phaser.Math.Between(campoEnemigo_x, campoEnemigo_w);
     } // artillero setear oncollide function with Base
 
-    function moverGrupodeArtilleros(bando){
-        var textura;
-        var arrayArtilleros; var arrayAviones;
-        /// ACA TENDRIA QUE PASARLE EL GRUPO DE ARTILLEROS Y AVIONES Y DEFINIR UNA TEXTURA PARA QUE FUNCIONE PARA AMBOS
-        if (bando ="Aliado"){
-            arrayArtilleros = Gpo_ArtillerosAliados.getChildren();
-            arrayAviones = Gpo_AvionesEnemigos.getChildren();
-            textura = "artillero_negro";
-        }else{
-            arrayArtilleros = Gpo_ArtillerosAliados.getChildren();
-            arrayAviones = Gpo_AvionesEnemigos.getChildren();
-            textura = "artillero_rojo";
-        }
-        //Para cada artillero del array
-        for (i = 0; i < arrayArtilleros.length; i++){
-            if(arrayArtilleros[i].vida > 0){
-                arrayArtilleros[i].HayEnemigo = false;
-                arrayArtilleros[i].setTexture(textura);
-                //para cada avion enemiga
-                for (j = 0; j < arrayAviones.length; j++){
-                    if(arrayAviones[j].vida > 0){
-                        if (arrayAviones[j].z < 200){
-                            //si distancia entre artillero y avion < 100
-                            distanciaEntreDosObjetos = distanceRound(arrayArtilleros[i], arrayAviones[j]); 
-                            rangoMaximoVision = arrayArtilleros[i].rangoVision;
-                            if (distanciaEntreDosObjetos > rangoMaximoVision) {
-                                moverArtillero(arrayArtilleros[i]);
-                            }
-                        } 
-                    }
+    function moverGrupodeArtilleros(){
+
+    var arrayArtilleros = Gpo_ArtillerosEnemigos.getChildren();
+    var arrayAviones = Gpo_AvionesAliados.getChildren();
+    var textura = "artillero_rojo";
+
+    //Para cada artillero del array
+    for (i = 0; i < arrayArtilleros.length; i++){
+        if(arrayArtilleros[i].vida > 0){
+            arrayArtilleros[i].HayEnemigo = false;
+            arrayArtilleros[i].setTexture(textura);
+            //para cada avion enemiga
+            for (j = 0; j < arrayAviones.length; j++){
+                if(arrayAviones[j].vida > 0){
+                    if (arrayAviones[j].z < 200){
+                        //si distancia entre artillero y avion < 100
+                        distanciaEntreDosObjetos = distanceRound(arrayArtilleros[i], arrayAviones[j]); 
+                        rangoMaximoVision = arrayArtilleros[i].rangoVision;
+                        if (distanciaEntreDosObjetos > rangoMaximoVision) {
+                            moverArtillero(arrayArtilleros[i]);
+                        }
+                    } 
                 }
             }
+        }
 
-        }  
-    } // artillero setear oncollide function with Base
+    }  
+} // artillero setear oncollide function with Base
 
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------------------FIN funciones y eventos artilleros-----------------------------------
