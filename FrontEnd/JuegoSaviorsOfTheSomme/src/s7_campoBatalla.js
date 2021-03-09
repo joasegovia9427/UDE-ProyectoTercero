@@ -175,6 +175,8 @@ var avionEnemiga_ActivaVy;
 var avionAliada_ActivaVx;
 var avionAliada_ActivaVy;
 
+var isInPause = false;
+
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
 
 /////----------------------------------------------------------------------------------
@@ -451,9 +453,63 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.load.image("artillero_negro_activo","./assets/images/objetos/artillero_negro_activo.png");
         this.load.image("artillero_rojo_activo","./assets/images/objetos/artillero_rojo_activo.png");
 
-        /// IMAGENES PARA VISTA LATERAL
+        /// ===========IMAGENES PARA VISTA LATERAL==============
         this.load.image("pisoLateral","./assets/images/texturas/pisoLateral.png");
-        this.load.image("avionNegroLateral","./assets/images/objetos/airplane_3.png");
+        this.load.image("separacionVertical","./assets/images/texturas/separacionVertical.png");
+        
+        this.load.image("pistaAvionesVLateral_negro","./assets/images/objetos/pistaAvionesVLateral_negro.png");
+        this.load.image("pistaAvionesVLateral_roja","./assets/images/objetos/pistaAvionesVLateral_roja.png");
+       
+        ////Para artilleros, deposito de combustible y dep de bombas usar los que tenemos
+        ////para torre de control usar estas:::
+
+        this.load.image("torreControl_VLateral_negra","./assets/images/objetos/torreControl_VLateral_negra.png");
+        this.load.image("torreControl_VLateral_negra_activa","./assets/images/objetos/torreControl_VLateral_negra_activa.png");
+        this.load.image("torreControl_VLateral_roja","./assets/images/objetos/torreControl_VLateral_roja.png");
+        this.load.image("torreControl_VLateral_roja_activa","./assets/images/objetos/torreControl_VLateral_roja_activa.png");
+        
+        ///////avion vista lateral
+        this.load.image("avionDerechaComunNegra","./assets/images/objetos/avion vista lateral/avionDerechaComunNegra.png");
+        this.load.image("avionDerechaComunRoja","./assets/images/objetos/avion vista lateral/avionDerechaComunRoja.png");
+        this.load.image("avionDerechaSoloDisparoNegra","./assets/images/objetos/avion vista lateral/avionDerechaSoloDisparoNegra.png");
+        this.load.image("avionDerechaSoloDisparoRoja","./assets/images/objetos/avion vista lateral/avionDerechaSoloDisparoRoja.png");
+        this.load.image("avionDerechaSoloImpactadaNegra","./assets/images/objetos/avion vista lateral/avionDerechaSoloImpactadaNegra.png");
+        this.load.image("avionDerechaSoloImpactadaRoja","./assets/images/objetos/avion vista lateral/avionDerechaSoloImpactadaRoja.png");
+        this.load.image("avionDerechaDisparandoEImpactadaNegra","./assets/images/objetos/avion vista lateral/avionDerechaDisparandoEImpactadaNegra.png");
+        this.load.image("avionDerechaDisparandoEImpactadaRoja","./assets/images/objetos/avion vista lateral/avionDerechaDisparandoEImpactadaRoja.png");
+        
+        this.load.image("avionIzquierdaComunNegra","./assets/images/objetos/avion vista lateral/avionIzquierdaComunNegra.png");
+        this.load.image("avionIzquierdaComunRoja","./assets/images/objetos/avion vista lateral/avionIzquierdaComunRoja.png");
+        this.load.image("avionIzquierdaSoloDisparoNegra","./assets/images/objetos/avion vista lateral/avionIzquierdaSoloDisparoNegra.png");
+        this.load.image("avionIzquierdaSoloDisparoRoja","./assets/images/objetos/avion vista lateral/avionIzquierdaSoloDisparoRoja.png");
+        this.load.image("avionIzquierdaSoloImpactadaNegra","./assets/images/objetos/avion vista lateral/avionIzquierdaSoloImpactadaNegra.png");
+        this.load.image("avionIzquierdaSoloImpactadaRoja","./assets/images/objetos/avion vista lateral/avionIzquierdaSoloImpactadaRoja.png");
+        this.load.image("avionIzquierdaDisparandoEImpactadaNegra","./assets/images/objetos/avion vista lateral/avionIzquierdaDisparandoEImpactadaNegra.png");
+        this.load.image("avionIzquierdaDisparandoEImpactadaRoja","./assets/images/objetos/avion vista lateral/avionIzquierdaDisparandoEImpactadaRoja.png");
+
+        ///////avion vista frontal
+        this.load.image("avionFrenteComunNegro","./assets/images/objetos/avion vista frontal/avionFrenteComunNegro.png");
+        this.load.image("avionFrenteComunRojo","./assets/images/objetos/avion vista frontal/avionFrenteComunRojo.png");
+        this.load.image("avionFrenteSoloDisparoNegra","./assets/images/objetos/avion vista frontal/avionFrenteSoloDisparoNegra.png");
+        this.load.image("avionFrenteSoloDisparoRojo","./assets/images/objetos/avion vista frontal/avionFrenteSoloDisparoRojo.png");
+        this.load.image("avionFrenteSoloImpactadaRoja","./assets/images/objetos/avion vista frontal/avionFrenteSoloImpactadaNegro.png");
+        this.load.image("avionFrenteDisparandoEImpactadaNegra","./assets/images/objetos/avion vista frontal/avionFrenteDisparandoEImpactadaNegra.png");
+        this.load.image("avionFrenteDisparandoEImpactadaRojo","./assets/images/objetos/avion vista frontal/avionFrenteDisparandoEImpactadaRojo.png");
+
+
+        ///////avion vista trasera
+        this.load.image("avionTraseraComunNegro","./assets/images/objetos/avion vista trasera/avionTraseraComunNegro.png");
+        this.load.image("avionTraseraComunRoja","./assets/images/objetos/avion vista trasera/avionTraseraComunRoja.png");
+        this.load.image("avionTraseraSoloDisparoNegra","./assets/images/objetos/avion vista trasera/avionTraseraSoloDisparoNegra.png");
+        this.load.image("avionTraseraSoloDisparoRojo","./assets/images/objetos/avion vista trasera/avionTraseraSoloDisparoRojo.png");
+        this.load.image("avionTraseraSoloImpactadaNegro","./assets/images/objetos/avion vista trasera/avionTraseraSoloImpactadaNegro.png");
+        this.load.image("avionTraseraSoloImpactadaRoja","./assets/images/objetos/avion vista trasera/avionTraseraSoloImpactadaRoja.png");
+        this.load.image("avionTraseraDisparandoEImpactadaNegra","./assets/images/objetos/avion vista trasera/avionTraseraDisparandoEImpactadaNegra.png");
+        this.load.image("avionTraseraDisparandoEImpactadaRoja","./assets/images/objetos/avion vista trasera/avionTraseraDisparandoEImpactadaRoja.png");
+
+
+        ///estas se eliminaran
+/*         this.load.image("avionNegroLateral","./assets/images/objetos/airplane_3.png");
         this.load.image("avionNegroLateralActivo","./assets/images/objetos/airplane_3.png");
         this.load.image("avionRojoLateral","./assets/images/objetos/airplane_3.png");
         this.load.image("avionRojoLateralActivo","./assets/images/objetos/airplane_3.png");
@@ -462,6 +518,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.load.image("torreControl_rojoLateralActivo","./assets/images/objetos/torreControl_VLateral_roja_activa.png");
         this.load.image("torreControl_negroLateral","./assets/images/objetos/torreControl_VLateral_negra.png");
         this.load.image("torreControl_negroLateralActivo","./assets/images/objetos/torreControl_VLateral_negra_activa.png");
+        
+         */
+
+
+        
         //balas
         this.load.image("bala", "./assets/images/objetos/bala.png");
 
@@ -603,6 +664,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 ////datos from json
             }
             this.deposito_combustibleAliado = this.physics.add.image(baseAliada_x, baseAliada_y, 'deposito_combustible_negro');//.setDisplayOrigin(0, 0);
+            this.deposito_combustibleAliado.nombre = "depCombustible";
             this.deposito_combustibleAliado.setCollideWorldBounds(true);
             this.deposito_combustibleAliado.setBounce(0);
             /* var elemento_w = this.deposito_combustibleAliado.width;
@@ -619,6 +681,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 ////datos from json
             }
             this.torreControlAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
+            this.torreControlAliada.nombre = "torreControl";
             this.torreControlAliada.setCollideWorldBounds(true);
             this.torreControlAliada.setBounce(0);
             this.torreControlAliada.vida = 100;
@@ -643,6 +706,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 ////datos from json
             }
             this.deposito_bombasAliado = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro');//.setDisplayOrigin(0, 0);
+            this.deposito_bombasAliado.nombre = "depBombas";
             this.deposito_bombasAliado.setCollideWorldBounds(true);
             this.deposito_bombasAliado.setBounce(0);
             this.deposito_bombasAliado.vida = 100;
@@ -659,6 +723,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 ////datos from json
             }
             this.pistaAvionesAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), (baseAliada_y+(elemento_w/2)+(elemento_espacio*2)) , 'pistaAviones_negro');     /////    baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
+            this.pistaAvionesAliada.nombre = "pistaAviones";
             this.pistaAvionesAliada.setCollideWorldBounds(true);
             this.pistaAvionesAliada.setBounce(0);
             this.pistaAvionesAliada.setImmovable();
@@ -729,6 +794,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             ////datos from json
         }
         this.pistaAvionesEnemiga = this.physics.add.image((baseEnemiga_x+elemento_w+elemento_espacio), (baseEnemiga_y-elemento_espacio/2), 'pistaAviones_rojo');    
+        this.pistaAvionesEnemiga.nombre = "pistaAviones";
         this.pistaAvionesEnemiga.setCollideWorldBounds(true);
         this.pistaAvionesEnemiga.setBounce(0);
         this.pistaAvionesEnemiga.setImmovable();
@@ -743,6 +809,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             ////datos from json
         }
         this.deposito_bombasEnemigo = this.physics.add.image( (baseEnemiga_x), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_bombas_rojo');//.setDisplayOrigin(0, 0);
+        this.deposito_bombasEnemigo.nombre = "depBombas";
         this.deposito_bombasEnemigo.setCollideWorldBounds(true);
         this.deposito_bombasEnemigo.setBounce(0);
         this.deposito_bombasEnemigo.vida = 100;
@@ -759,6 +826,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             ////datos from json
         }
         this.torreControlEnemiga = this.physics.add.image( (baseEnemiga_x+elemento_espacio*3.5), (baseEnemiga_y+(elemento_espacio*2.5)), 'torreControl_rojo');//.setDisplayOrigin(0, 0);
+        this.torreControlEnemiga.nombre = "torreControl";
         this.torreControlEnemiga.setCollideWorldBounds(true);
         this.torreControlEnemiga.setBounce(0);
         this.torreControlEnemiga.vida = 100;
@@ -783,6 +851,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             ////datos from json
         }
         this.deposito_combustibleEnemigo = this.physics.add.image((baseEnemiga_x+elemento_espacio*7), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_combustible_rojo');//.setDisplayOrigin(0, 0);
+        this.deposito_combustibleEnemigo.nombre = "depCombustible";
         this.deposito_combustibleEnemigo.setCollideWorldBounds(true);
         this.deposito_combustibleEnemigo.setBounce(0);
         // var elemento_w = this.deposito_combustibleAliado.width;
@@ -1089,7 +1158,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 setVelocidadAvion(avionAliada_Activa, vX, vY);
                 modificoDireccion = true;
                 var cursors = this.input.keyboard.createCursorKeys();
-                var duration = this.cursors.getDuration();
+                //var duration = this.cursors.getDuration();
                 console.log(this.duration);
                 
                /*  if (ultimaTeclaPresionada != ultimaTeclaPresionadaAux) {
@@ -1254,8 +1323,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 evento_tecla_autodestruccion();
                 break;
             case Phaser.Input.Keyboard.KeyCodes.P:
-                console.log("Aprete la P");
-                pausarJuego();
+                if (isInPause == false) {
+                    isInPause = true;
+                    pausarJuego();
+                } else {
+                    isInPause = false;
+                    reanudarJuego();
+                }
                 break;
             case Phaser.Input.Keyboard.KeyCodes.R:
                 reanudarJuego();
@@ -2265,11 +2339,21 @@ function cargaElementosVistaLateral(){
     sceneJuego.pisoLateral.setVisible(false);
     sceneJuego.pisoLateral.displayWidth    = campoAliado_w;
     sceneJuego.pisoLateral.displayHeight   = campoAliado_h+campoEnemigo_h;
-    avionActivaAliadaLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'avionNegroLateral');
+    
+    sceneJuego.separacionVertical = sceneJuego.add.image(50,0, 'separacionVertical');
+    sceneJuego.separacionVertical.setDepth(900);
+    sceneJuego.separacionVertical.setVisible(false);
+    sceneJuego.separacionVertical.displayWidth    = 300;
+    sceneJuego.separacionVertical.displayHeight   = 1200;
+
+
+    avionActivaAliadaLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'avionIzquierdaComunNegra');
     avionActivaAliadaLateral.setVisible(false);
     avionActivaAliadaLateral.setDepth(100);
-    sceneJuego.torreControlAliada = sceneJuego.add.image(0, ((campoAliado_h+campoEnemigo_h)/2), 'torreControl_negroLateral');
-    sceneJuego.torreControlAliada.setDepth(100);
+    
+    sceneJuego.torreControlAliadaLateral = sceneJuego.add.image(800, ((campoAliado_h+campoEnemigo_h)/2), 'torreControl_VLateral_negra');
+    sceneJuego.torreControlAliadaLateral.setDepth(100);
+
 }
 
 function reanudarJuego ()
@@ -2280,10 +2364,10 @@ function reanudarJuego ()
 		/* sonidoReanudar.play();
 		opvReanudar();	
 		musicaFondo.play();*/
-		
+		sceneJuego.separacionVertical.setVisible(false);
 		sceneJuego.pisoLateral.setVisible(false);
         avionActivaAliadaLateral.setVisible(false);
-        sceneJuego.torreControlAliada.setVisible(false);
+        sceneJuego.torreControlAliadaLateral.setVisible(false);
 	}
 	if (!pausar){
 		// ALGO
@@ -2308,33 +2392,67 @@ function pausarJuego ()
                 'PARTIDA PAUSADA ',
             ]);
             //Muestra Vista Lateral
+            if (avionAliada_Activa.y > campoEnemigo_h) {
+                avionActivaAliadaLateral.setVisible(true);
+            }
 			sceneJuego.pisoLateral.setVisible(true);
-            avionActivaAliadaLateral.setVisible(true);
-            sceneJuego.torreControlAliada.setVisible(true);
+            sceneJuego.separacionVertical.setVisible(true);
+            sceneJuego.torreControlAliadaLateral.setVisible(true);
             
             var sgm_pantalla = (campoAliado_h+campoEnemigo_h)/3;
             switch (avionAliada_Activa.z){
                 case 0:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-70;
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-350;
                     avionActivaAliadaLateral.scaleX=0.8;
                     avionActivaAliadaLateral.scaleY=0.8;
                     break;
                 case 100:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-300;
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-450;
                     avionActivaAliadaLateral.scaleX=0.5;
                     avionActivaAliadaLateral.scaleY=0.5;
                     break;
                 case 200:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-500;
+                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-550;
                     avionActivaAliadaLateral.scaleX=0.3;
                     avionActivaAliadaLateral.scaleY=0.3;
                     break;
-            }			
-            avionActivaAliadaLateral.x = 200;
+            }	
+
+            y = avionAliada_Activa.y;
+            x = dadoVistaAereaY_obtengoUnXParaLateral(y);
+            avionActivaAliadaLateral.x = x;
+
             /// DIBUJAR LOS ELEMENTOS DE LA BASE.
-            sceneJuego.torreControlAliada.x=200;
-            sceneJuego.torreControlAliada.y=(campoAliado_h+campoEnemigo_h)-70;
+            sceneJuego.torreControlAliadaLateral.x=200;
+            sceneJuego.torreControlAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-70;
 	}else{
         sceneJuego.pisoLateral.setVisible(false);
     }
+}
+
+function dadoVistaAereaY_obtengoUnXParaLateral(vistaAereaY){
+    console.log("IN vistaAereaY::"+vistaAereaY);
+
+    var vistaLateralX=100;
+
+    ////vista aerea va entre 300 y 600, o sea, mi 100% es 300
+    var xABuscarEnPrimeraReglaDe3 = 0;
+    var valorEntrante = (vistaAereaY-300);    
+    // x% --- 100%
+    // val --- 300px
+    ////aplicao regla de 3...
+    xABuscarEnPrimeraReglaDe3 = (valorEntrante*100) / 300
+
+
+    ////vista lateral va desde 100 a 900 (valor absoluto de 800),
+    //// o sea mi 100% es 800
+    var xEntranteQueTengoDeAntes = xABuscarEnPrimeraReglaDe3;
+    // x% de arriba ---- 100%
+    // y en PX      ---- 800px
+    ////aplico segunda regla de 3
+    var valorEnPXLateralesAntesDeSalir = (xEntranteQueTengoDeAntes*800) / 100;
+    vistaLateralX = valorEnPXLateralesAntesDeSalir+100;
+
+    console.log("OUT vistaLateralX::"+vistaLateralX);
+    return vistaLateralX;
 }
