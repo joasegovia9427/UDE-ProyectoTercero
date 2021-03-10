@@ -88,7 +88,25 @@ var tweenBombaE;
 // ELEMENTOS
 var avionAliada_Activa;
 var avionActivaAliadaLateral;
+var avionActivaEnemigaLateral;
 var avionEnemiga_Activa;
+
+
+var deposito_combustibleAliado;
+var torreControlAliada;
+var deposito_bombasAliado;
+var pistaAvionesEnemiga;
+var deposito_bombasEnemigo;
+var torreControlEnemiga;
+var deposito_combustibleEnemigo;
+var pistaAvionesAliada;
+var torreControlAliadaLateral;
+var pisoLateral;
+var separacionVertical;
+var pistaDeAvionAliadaLateral;
+var depositoDeBombasAliadoLateral;
+var depositoDeCombustibleAliadoLateral;
+
 
 var avionA_1;
 var avionA_2;
@@ -197,6 +215,12 @@ var datosRecibidosDesdeJugadorNumero;
 
 var jugadorMiNumero = 0;
 
+var ejecutaOnMessagePorPrimeraVez = true;
+
+var cabezalDatosPrincipalesEnemigos = false;
+
+var isEnvioMisDatosBase = true;
+
 ///// METODOS WEBSOCKETS
 webSocket.onopen = function(event) {
     var numRandomAux = Math.round(Math.random() * 10);
@@ -236,11 +260,11 @@ webSocket.onclose = function(event) {
 };
 
 webSocket.onerror = function(event) {
-    alert("Error con el WebSocket ***Verifique que el server este prendido: " + event, event );
+    //alert("Error con el WebSocket ***Verifique que el server este prendido: " + event, event );
 }; 
 
 ///// METODOS EVENTOS DE NAVEGADOR Y PESTAÑA
-window.addEventListener('beforeunload', function (e) {   
+/* window.addEventListener('beforeunload', function (e) {   
     isWSOpen = "false";
     webSocket.send("dato a mandar como que cerre pestaña");
     
@@ -254,7 +278,7 @@ window.addEventListener('beforeunload', function (e) {
     
   } 
   
-); 
+);  */
 
 function onMessage(event) {
     console.log("-------function onMessage(event)---------------------------");
@@ -265,104 +289,205 @@ function onMessage(event) {
     var data = JSON.parse(event.data);
     console.log("data:"+data);
 
-    datosRecibidosDesdeJugadorNumero = data.enviaDatoDesdeElJugadorNum;
-    console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
+/*     if (ejecutaOnMessagePorPrimeraVez) {
+        ejecutaOnMessagePorPrimeraVez = false;
+ */
 
-    if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
-        ////sincronizo mis datos
-        isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
-        console.log("isIngresoPorPrimeraVez: "+isIngresoPorPrimeraVez);
-        if ( (data.sessionId != mi_SessId) && (mi_SessId != "mi_sessIdToChange") ) {
-            console.log("algo raro paso, entro con el mismo numero de juego y ademas que no entro por primera vez, o sea entro posterior, y ademas con diferente sessID");
-            console.log("data.sessionId::"+data.sessionId);
-            console.log("mi_SessId previa::"+mi_SessId);
-        }
-        mi_SessId = data.sessionId;
-        console.log("mi_SessId: "+mi_SessId);
+        datosRecibidosDesdeJugadorNumero = data.enviaDatoDesdeElJugadorNum;
+        console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
 
-
-        rows =
-            { "partidaId": partidaID
-            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-            , "sessionId": mi_SessId
-            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-            //, "arreLista" : [lista, lista2]
-            };
- 
-    } else {
-        ////sino, me estan llegando datos del enemigo...
-        //// sincronizo los datos de los elementos enemigos
-        isTrajoDatosEnemigos = true;
-
-        contrincante_SessId = data.sessionId;
-        //console.log("contrincante_SessId: "+contrincante_SessId);
-
-        x = data.avionActivaX;
-        y = data.avionActivaY;
-
-        console.log("x y :::"+ x + " -- " + y)
-
-        in_avionEnemigaActivaX = (1000 - x);
-        in_avionEnemigaActivaY = (600 - y);
-        
-        //console.log("in_avionEnemigaActiva x y :::"+ in_avionEnemigaActivaX + " -- " + in_avionEnemigaActivaY)
+        if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
+            ////sincronizo mis datos
+            isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
+            console.log("isIngresoPorPrimeraVez: "+isIngresoPorPrimeraVez);
+            if ( (data.sessionId != mi_SessId) && (mi_SessId != "mi_sessIdToChange") ) {
+                console.log("algo raro paso, entro con el mismo numero de juego y ademas que no entro por primera vez, o sea entro posterior, y ademas con diferente sessID");
+                console.log("data.sessionId::"+data.sessionId);
+                console.log("mi_SessId previa::"+mi_SessId);
+            }
+            mi_SessId = data.sessionId;
+            console.log("mi_SessId: "+mi_SessId);
 
 
-        x = data.avionActivaVx;
-        y = data.avionActivaVY;
-        //console.log("Vx Vy :::"+ x + " -- " + y)
-
-        in_avionEnemiga_ActivaVx = (x*-1);
-        in_avionEnemiga_ActivaVy = (y*-1);
-        
-        //console.log("in_avionEnemigaActiva Vx Vy :::"+ in_avionEnemiga_ActivaVx + " -- " + in_avionEnemiga_ActivaVy)
-        
-        avionEnemiga_Activa.resetFlip();
-
-        x = data.avionActivaAngulo;
-        y = (x*-1);
-        avionEnemiga_Activa.angle = y;  
-        
-        if (y==0) {
-            x = data.avionActivaFlipX;        
-            avionEnemiga_Activa.flipX = !x; 
-        }
-
-        avionEnemiga_Activa.x = in_avionEnemigaActivaX;
-        avionEnemiga_Activa.y = in_avionEnemigaActivaY;
-        avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
-        avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
-        setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
-
+            rows =
+                { "partidaId": partidaID
+                , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+                , "sessionId": mi_SessId
+                , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+                //, "arreLista" : [lista, lista2]
+                };
     
-   
-    }
+        } else 
+        {
+            ////sino, me estan llegando datos del enemigo...
+            //// sincronizo los datos de los elementos enemigos
 
+            cabezalDatosPrincipalesEnemigos = data.cabezalDatosPrincipalesEnemigos;
+            console.log("cabezalDatosPrincipalesEnemigos: "+cabezalDatosPrincipalesEnemigos);
+
+            if (cabezalDatosPrincipalesEnemigos) {
+                //sincronizo datos de base de enemigo
+                console.log("entro al if cabezalDatosPrincipalesEnemigos");
+
+                x = data.deposito_bombasAliadoX;
+                deposito_bombasEnemigo.x = (1000 - x);
+                y = data.deposito_bombasAliadoY;
+                deposito_bombasEnemigo.y = (600 - y);
+                
+                x = data.torreControlAliadaX;
+                torreControlEnemiga.x = (1000 - x);
+                y = data.torreControlAliadaY;
+                torreControlEnemiga.y = (600 - y);
+
+                x = data.deposito_combustibleAliadoX;
+                deposito_combustibleEnemigo.x = (1000 - x);
+                y = data.deposito_combustibleAliadoY;
+                deposito_combustibleEnemigo.y = (600 - y);
+             
+                x = data.pistaAvionesAliadaX;
+                pistaAvionesEnemiga.x = (1000 - x);
+                y = data.pistaAvionesAliadaY;
+                pistaAvionesEnemiga.y = (600 - y);
+     
+
+            } else 
+            {
+                           
+                isTrajoDatosEnemigos = true;
+
+                contrincante_SessId = data.sessionId;
+                //console.log("contrincante_SessId: "+contrincante_SessId);
+
+                x = data.avionActivaX;
+                y = data.avionActivaY;
+
+                console.log("x y :::"+ x + " -- " + y)
+
+                in_avionEnemigaActivaX = (1000 - x);
+                in_avionEnemigaActivaY = (600 - y);
+                
+                //console.log("in_avionEnemigaActiva x y :::"+ in_avionEnemigaActivaX + " -- " + in_avionEnemigaActivaY)
+
+
+                x = data.avionActivaVx;
+                y = data.avionActivaVY;
+                //console.log("Vx Vy :::"+ x + " -- " + y)
+
+                in_avionEnemiga_ActivaVx = (x*-1);
+                in_avionEnemiga_ActivaVy = (y*-1);
+                
+                //console.log("in_avionEnemigaActiva Vx Vy :::"+ in_avionEnemiga_ActivaVx + " -- " + in_avionEnemiga_ActivaVy)
+                
+                avionEnemiga_Activa.resetFlip();
+
+                x = data.avionActivaAngulo;
+                y = (x*-1);
+                avionEnemiga_Activa.angle = y;  
+                
+                if (y==0) {
+                    x = data.avionActivaFlipX;        
+                    avionEnemiga_Activa.flipX = !x; 
+                }
+
+                avionEnemiga_Activa.x = in_avionEnemigaActivaX;
+                avionEnemiga_Activa.y = in_avionEnemigaActivaY;
+                avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
+                avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
+                setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
+
+            }
+
+ 
+        
+    
+        }
+
+
+
+
+/* 
+    } else { */
+        ///console.log("entro a ver quien le volvio a mandar datos");
+/* 
+        contrincante_SessId = data.contrincante_SessId;
+        console.log("contrincante_SessId: "+contrincante_SessId);
+        if (mi_SessId != contrincante_SessId) {
+            ////Entro a sincronizar datos
+
+            
+
+
+
+        } else {
+            
+        }
+
+
+
+
+    } */
 
 
  }
  
 function sendDatosWebSocket(){
+    if (isEnvioMisDatosBase) {
+        isEnvioMisDatosBase = false;
 
-    rows =
-    { "partidaId": partidaID
-    , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-    , "sessionId": mi_SessId
-    , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-    , "avionActivaX": avionAliada_Activa.x
-    , "avionActivaY": avionAliada_Activa.y
-    , "avionActivaVx": avionAliada_ActivaVx
-    , "avionActivaVY": avionAliada_ActivaVy
-    , "avionActivaAngulo": avionAliada_Activa.angle
-    , "avionActivaFlipX": avionAliada_Activa.flipX
-    //, "arreLista" : [lista, lista2]
-    };
-    dataJson = JSON.stringify(rows);
-    if (isWSOpen) {
-        console.log("dataJson::"+dataJson);
-        webSocket.send(dataJson);
+        rows =
+        { "partidaId": partidaID
+        , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+        , "sessionId": mi_SessId
+        , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+        , "cabezalDatosPrincipalesEnemigos": true
+
+        , "deposito_bombasAliadoX": deposito_bombasAliado.x
+        , "deposito_bombasAliadoY": deposito_bombasAliado.y
+
+        , "torreControlAliadaX": torreControlAliada.x
+        , "torreControlAliadaY": torreControlAliada.y
+
+        , "deposito_combustibleAliadoX": deposito_combustibleAliado.x
+        , "deposito_combustibleAliadoY": deposito_combustibleAliado.y
+
+        , "pistaAvionesAliadaX": pistaAvionesAliada.x
+        , "pistaAvionesAliadaY": pistaAvionesAliada.y
+                
+        //artilleroA_1
+
+        };
+        dataJson = JSON.stringify(rows);
+
+        console.log("isEnvioMisDatosBase dataJson::" + dataJson);
+
+        if (isWSOpen) {
+            webSocket.send(dataJson);
+        }
+  
+        
+    }else{
+
+
+        rows =
+        { "partidaId": partidaID
+        , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+        , "sessionId": mi_SessId
+        , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+        , "cabezalDatosPrincipalesEnemigos": false
+        , "avionActivaX": avionAliada_Activa.x
+        , "avionActivaY": avionAliada_Activa.y
+        , "avionActivaVx": avionAliada_ActivaVx
+        , "avionActivaVY": avionAliada_ActivaVy
+        , "avionActivaAngulo": avionAliada_Activa.angle
+        , "avionActivaFlipX": avionAliada_Activa.flipX
+        //, "arreLista" : [lista, lista2]
+        };
+        dataJson = JSON.stringify(rows);
+        if (isWSOpen) {
+            console.log("dataJson::"+dataJson);
+            webSocket.send(dataJson);
+        }
     }
-
 
 }
 
@@ -621,7 +746,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
   
 
         /////------------------CREACION DE MI BASE::--------------
-            elemento_w          = 50;//this.deposito_combustibleAliado.width;
+            elemento_w          = 50;//deposito_combustibleAliado.width;
             elemento_espacio    = 20;    
         
             base_inicioRandom_x = Phaser.Math.Between(origen_x+20,700); 
@@ -657,78 +782,80 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
             ////CREACION DE deposito_combustibleAliado
+            
             if (juego_var_isPartidaNueva) {
-
+                deposito_combustibleAliado = this.physics.add.image(baseAliada_x, baseAliada_y, 'deposito_combustible_negro');//.setDisplayOrigin(0, 0);
+                deposito_combustibleAliado.nombre = "depCombustible";
+                deposito_combustibleAliado.setCollideWorldBounds(true);
+                deposito_combustibleAliado.setBounce(0);
+                /* var elemento_w = deposito_combustibleAliado.width;
+                var elemento_espacio = 20; */
+                deposito_combustibleAliado.vida = 100;
+                deposito_combustibleAliado.physicsBodyType = Phaser.Physics.ARCADE;;
+                Gpo_ElementosBaseAliada.add(deposito_combustibleAliado);
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
             }
-            this.deposito_combustibleAliado = this.physics.add.image(baseAliada_x, baseAliada_y, 'deposito_combustible_negro');//.setDisplayOrigin(0, 0);
-            this.deposito_combustibleAliado.nombre = "depCombustible";
-            this.deposito_combustibleAliado.setCollideWorldBounds(true);
-            this.deposito_combustibleAliado.setBounce(0);
-            /* var elemento_w = this.deposito_combustibleAliado.width;
-            var elemento_espacio = 20; */
-            this.deposito_combustibleAliado.vida = 100;
-            this.deposito_combustibleAliado.physicsBodyType = Phaser.Physics.ARCADE;;
-            Gpo_ElementosBaseAliada.add(this.deposito_combustibleAliado);
+
        
             ////CREACION DE torreControl
             if (juego_var_isPartidaNueva) {
-
+                torreControlAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
+                torreControlAliada.nombre = "torreControl";
+                torreControlAliada.bando = "Aliado";
+                torreControlAliada.setCollideWorldBounds(true);
+                torreControlAliada.setBounce(0);
+                torreControlAliada.vida = 100;
+                torreControlAliada.hayEnemigo = false;
+                torreControlAliada.rangoVision = rangoVisionTorre;
+                torreControlAliada.lastFiredTorre = 0;
+                torreControlAliada.bullet_torre_Aliada = this.physics.add.group({
+                    classType: Bullet,
+                    maxSize: 3,
+                    runChildUpdate: true
+                });
+                torreControlAliada.bullet_torre_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
+                torreControlAliada.setImmovable();
+                torreControlAliada.physicsBodyType = Phaser.Physics.ARCADE;
+                Gpo_ElementosBaseAliada.add(torreControlAliada);
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
             }
-            this.torreControlAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), baseAliada_y, 'torreControl_negro');//.setDisplayOrigin(0, 0);
-            this.torreControlAliada.nombre = "torreControl";
-            this.torreControlAliada.setCollideWorldBounds(true);
-            this.torreControlAliada.setBounce(0);
-            this.torreControlAliada.vida = 100;
-            this.torreControlAliada.hayEnemigo = false;
-            this.torreControlAliada.rangoVision = rangoVisionTorre;
-            this.torreControlAliada.lastFiredTorre = 0;
-            this.torreControlAliada.bullet_torre_Aliada = this.physics.add.group({
-                classType: Bullet,
-                maxSize: 3,
-                runChildUpdate: true
-            });
-            this.torreControlAliada.bullet_torre_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
-            this.torreControlAliada.setImmovable();
-            this.torreControlAliada.physicsBodyType = Phaser.Physics.ARCADE;
-            Gpo_ElementosBaseAliada.add(this.torreControlAliada);
+
 
             ////CREACION DE deposito_bombasAliado
             if (juego_var_isPartidaNueva) {
-
+                deposito_bombasAliado = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro');//.setDisplayOrigin(0, 0);
+                deposito_bombasAliado.nombre = "depBombas";
+                deposito_bombasAliado.setCollideWorldBounds(true);
+                deposito_bombasAliado.setBounce(0);
+                deposito_bombasAliado.vida = 100;
+                deposito_bombasAliado.setImmovable();
+                deposito_bombasAliado.physicsBodyType = Phaser.Physics.ARCADE;
+                Gpo_ElementosBaseAliada.add(deposito_bombasAliado);
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
             }
-            this.deposito_bombasAliado = this.physics.add.image( (baseAliada_x+(elemento_w*2)+(elemento_espacio*2)), baseAliada_y, 'deposito_bombas_negro');//.setDisplayOrigin(0, 0);
-            this.deposito_bombasAliado.nombre = "depBombas";
-            this.deposito_bombasAliado.setCollideWorldBounds(true);
-            this.deposito_bombasAliado.setBounce(0);
-            this.deposito_bombasAliado.vida = 100;
-            this.deposito_bombasAliado.setImmovable();
-            this.deposito_bombasAliado.physicsBodyType = Phaser.Physics.ARCADE;
-            Gpo_ElementosBaseAliada.add(this.deposito_bombasAliado);
+
  
 
             ////CREACION DE pistaAvionesAliada
             if (juego_var_isPartidaNueva) {
-
+                pistaAvionesAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), (baseAliada_y+(elemento_w/2)+(elemento_espacio*2)) , 'pistaAviones_negro');     /////    baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
+                pistaAvionesAliada.nombre = "pistaAviones";
+                pistaAvionesAliada.setCollideWorldBounds(true);
+                pistaAvionesAliada.setBounce(0);
+                pistaAvionesAliada.setImmovable();
+                pistaAvionesAliada.physicsBodyType = Phaser.Physics.ARCADE;
+                Gpo_ElementosBaseAliada.add(pistaAvionesAliada);
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
             }
-            this.pistaAvionesAliada = this.physics.add.image( (baseAliada_x+elemento_w+elemento_espacio), (baseAliada_y+(elemento_w/2)+(elemento_espacio*2)) , 'pistaAviones_negro');     /////    baseAliada_x, (baseAliada_y+elemento_w+elemento_espacio), 'pistaAviones_negro').setDisplayOrigin(0, 0);
-            this.pistaAvionesAliada.nombre = "pistaAviones";
-            this.pistaAvionesAliada.setCollideWorldBounds(true);
-            this.pistaAvionesAliada.setBounce(0);
-            this.pistaAvionesAliada.setImmovable();
-            this.pistaAvionesAliada.physicsBodyType = Phaser.Physics.ARCADE;
-            Gpo_ElementosBaseAliada.add(this.pistaAvionesAliada);
+
 
             ////CREACION DE Artilleros Aliados
             if (juego_var_isPartidaNueva) {
@@ -760,7 +887,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
         /////------------------CREACION DE BASE ENEMIGA::--------------
-        elemento_w          = 50;//this.deposito_combustibleEnemigo.width;
+        elemento_w          = 50;//deposito_combustibleEnemigo.width;
         elemento_espacio    = 20;    
     
         base_inicioRandom_x = Phaser.Math.Between(origen_x+20,700); 
@@ -788,77 +915,79 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         ////CREACION DE pistaAvionesEnemiga
         if (juego_var_isPartidaNueva) {
-
+            pistaAvionesEnemiga = this.physics.add.image((baseEnemiga_x+elemento_w+elemento_espacio), (baseEnemiga_y-elemento_espacio/2), 'pistaAviones_rojo');    
+            pistaAvionesEnemiga.nombre = "pistaAviones";
+            pistaAvionesEnemiga.setCollideWorldBounds(true);
+            pistaAvionesEnemiga.setBounce(0);
+            pistaAvionesEnemiga.setImmovable();
+            pistaAvionesEnemiga.physicsBodyType = Phaser.Physics.ARCADE;
+            ///////Gpo_ElementosBaseEnemiga.add(pistaAvionesEnemiga);
         }else{
             /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
             ////datos from json
         }
-        this.pistaAvionesEnemiga = this.physics.add.image((baseEnemiga_x+elemento_w+elemento_espacio), (baseEnemiga_y-elemento_espacio/2), 'pistaAviones_rojo');    
-        this.pistaAvionesEnemiga.nombre = "pistaAviones";
-        this.pistaAvionesEnemiga.setCollideWorldBounds(true);
-        this.pistaAvionesEnemiga.setBounce(0);
-        this.pistaAvionesEnemiga.setImmovable();
-        this.pistaAvionesEnemiga.physicsBodyType = Phaser.Physics.ARCADE;
-        ///////Gpo_ElementosBaseEnemiga.add(this.pistaAvionesEnemiga);
+
 
         ////CREACION DE deposito_bombasEnemigo
         if (juego_var_isPartidaNueva) {
-
+            deposito_bombasEnemigo = this.physics.add.image( (baseEnemiga_x), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_bombas_rojo');//.setDisplayOrigin(0, 0);
+            deposito_bombasEnemigo.nombre = "depBombas";
+            deposito_bombasEnemigo.setCollideWorldBounds(true);
+            deposito_bombasEnemigo.setBounce(0);
+            deposito_bombasEnemigo.vida = 100;
+            deposito_bombasEnemigo.setImmovable();
+            deposito_bombasEnemigo.physicsBodyType = Phaser.Physics.ARCADE;
+            Gpo_ElementosBaseEnemiga.add(deposito_bombasEnemigo);
         }else{
             /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
             ////datos from json
         }
-        this.deposito_bombasEnemigo = this.physics.add.image( (baseEnemiga_x), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_bombas_rojo');//.setDisplayOrigin(0, 0);
-        this.deposito_bombasEnemigo.nombre = "depBombas";
-        this.deposito_bombasEnemigo.setCollideWorldBounds(true);
-        this.deposito_bombasEnemigo.setBounce(0);
-        this.deposito_bombasEnemigo.vida = 100;
-        this.deposito_bombasEnemigo.setImmovable();
-        this.deposito_bombasEnemigo.physicsBodyType = Phaser.Physics.ARCADE;
-        Gpo_ElementosBaseEnemiga.add(this.deposito_bombasEnemigo);
+
+
 
 
         ////CREACION DE torreControl
         if (juego_var_isPartidaNueva) {
-
+            torreControlEnemiga = this.physics.add.image( (baseEnemiga_x+elemento_espacio*3.5), (baseEnemiga_y+(elemento_espacio*2.5)), 'torreControl_rojo');//.setDisplayOrigin(0, 0);
+            torreControlEnemiga.nombre = "torreControl";
+            torreControlEnemiga.bando = "Enemigo";
+            torreControlEnemiga.setCollideWorldBounds(true);
+            torreControlEnemiga.setBounce(0);
+            torreControlEnemiga.vida = 100;
+            torreControlEnemiga.hayEnemigo = false;
+            torreControlEnemiga.rangoVision = rangoVisionTorre;
+            torreControlEnemiga.lastFiredTorre = 0;
+            torreControlEnemiga.bullet_torre_Enemiga = this.physics.add.group({
+                classType: Bullet,
+                maxSize: 3,
+                runChildUpdate: true
+            });
+            torreControlEnemiga.bullet_torre_Enemiga.physicsBodyType = Phaser.Physics.ARCADE;
+            torreControlEnemiga.setImmovable();
+            torreControlEnemiga.physicsBodyType = Phaser.Physics.ARCADE;
+            Gpo_ElementosBaseEnemiga.add(torreControlEnemiga);
         }else{
             /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
             ////datos from json
         }
-        this.torreControlEnemiga = this.physics.add.image( (baseEnemiga_x+elemento_espacio*3.5), (baseEnemiga_y+(elemento_espacio*2.5)), 'torreControl_rojo');//.setDisplayOrigin(0, 0);
-        this.torreControlEnemiga.nombre = "torreControl";
-        this.torreControlEnemiga.setCollideWorldBounds(true);
-        this.torreControlEnemiga.setBounce(0);
-        this.torreControlEnemiga.vida = 100;
-        this.torreControlEnemiga.hayEnemigo = false;
-        this.torreControlEnemiga.rangoVision = rangoVisionTorre;
-        this.torreControlEnemiga.lastFiredTorre = 0;
-        this.torreControlEnemiga.bullet_torre_Enemiga = this.physics.add.group({
-            classType: Bullet,
-            maxSize: 3,
-            runChildUpdate: true
-        });
-        this.torreControlEnemiga.bullet_torre_Enemiga.physicsBodyType = Phaser.Physics.ARCADE;
-        this.torreControlEnemiga.setImmovable();
-        this.torreControlEnemiga.physicsBodyType = Phaser.Physics.ARCADE;
-        Gpo_ElementosBaseEnemiga.add(this.torreControlEnemiga);
+
 
         ////CREACION DE deposito_combustibleEnemigo
         if (juego_var_isPartidaNueva) {
-
+            deposito_combustibleEnemigo = this.physics.add.image((baseEnemiga_x+elemento_espacio*7), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_combustible_rojo');//.setDisplayOrigin(0, 0);
+            deposito_combustibleEnemigo.nombre = "depCombustible";
+            deposito_combustibleEnemigo.setCollideWorldBounds(true);
+            deposito_combustibleEnemigo.setBounce(0);
+            // var elemento_w = deposito_combustibleAliado.width;
+            //var elemento_espacio = 20; 
+            deposito_combustibleEnemigo.vida = 100;
+            deposito_combustibleEnemigo.physicsBodyType = Phaser.Physics.ARCADE;;
+            Gpo_ElementosBaseEnemiga.add(deposito_combustibleEnemigo);
         }else{
             /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
             ////datos from json
         }
-        this.deposito_combustibleEnemigo = this.physics.add.image((baseEnemiga_x+elemento_espacio*7), (baseEnemiga_y+(elemento_espacio*2.5)), 'deposito_combustible_rojo');//.setDisplayOrigin(0, 0);
-        this.deposito_combustibleEnemigo.nombre = "depCombustible";
-        this.deposito_combustibleEnemigo.setCollideWorldBounds(true);
-        this.deposito_combustibleEnemigo.setBounce(0);
-        // var elemento_w = this.deposito_combustibleAliado.width;
-        //var elemento_espacio = 20; 
-        this.deposito_combustibleEnemigo.vida = 100;
-        this.deposito_combustibleEnemigo.physicsBodyType = Phaser.Physics.ARCADE;;
-        Gpo_ElementosBaseEnemiga.add(this.deposito_combustibleEnemigo);
+
 
 
         ////CREACION DE Artilleros Enemigos
@@ -946,10 +1075,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
         artilleroE_4.mask = spotlight_instance;
         artilleroE_5.mask = spotlight_instance;
         artilleroE_6.mask = spotlight_instance;
-        this.torreControlEnemiga.mask = spotlight_instance;
-        this.pistaAvionesEnemiga.mask = spotlight_instance;
-        this.deposito_bombasEnemigo.mask = spotlight_instance;
-        this.deposito_combustibleEnemigo.mask = spotlight_instance;
+        torreControlEnemiga.mask = spotlight_instance;
+        pistaAvionesEnemiga.mask = spotlight_instance;
+        deposito_bombasEnemigo.mask = spotlight_instance;
+        deposito_combustibleEnemigo.mask = spotlight_instance;
  */
 
         ///aplico a los elementos enemigos
@@ -1027,9 +1156,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.physics.add.overlap(bombaBulletA, Gpo_ArtillerosEnemigos, overlapEvent_impactoBombaEnArtilleroE, null, this);
 
         // DISPARO DESDE TORRE ALIADA
-        this.physics.add.overlap(this.torreControlAliada.bullet_torre_Aliada, Gpo_AvionesEnemigos, overlapEvent_impactoBalaEnAvionE, null, this);
+        this.physics.add.overlap(torreControlAliada.bullet_torre_Aliada, Gpo_AvionesEnemigos, overlapEvent_impactoBalaEnAvionE, null, this);
         // DISPARO DESDE TORRE ENEMIGA
-        this.physics.add.overlap(this.torreControlEnemiga.bullet_torre_Enemiga, Gpo_AvionesAliados, overlapEvent_impactoBalaEnAvionA, null, this);
+        this.physics.add.overlap(torreControlEnemiga.bullet_torre_Enemiga, Gpo_AvionesAliados, overlapEvent_impactoBalaEnAvionA, null, this);
 
         // DISPARO DESDE ARTILLEROS ALIADOS
         this.physics.add.overlap(artilleroA_1.bullets_artillero_Aliada, Gpo_AvionesEnemigos, overlapEvent_impactoBalaEnAvionE, null, this);
@@ -1060,10 +1189,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
             delay: 15000,   // EN MILI SEGUNDOS
             //callback: callback,
             callback: moverGrupodeArtilleros,
-            args: [Gpo_ArtillerosAliados.getChildren(),Gpo_AvionesEnemigos.getChildren()],
+            args: [Gpo_ArtillerosAliados.getChildren()],
             callbackScope: Gpo_ArtillerosAliados,
             loop: true,
         });
+        //args: [Gpo_ArtillerosAliados.getChildren(),Gpo_AvionesEnemigos.getChildren()], 
 
         isContinuarUpdate = true;
 
@@ -1071,6 +1201,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         /// VISTA LATERAL CARGO IMAGENES CORRESPONDIENTES
 
         cargaElementosVistaLateral();
+
+
     }////CIERRE CREATE
     ////////////////---------------------------------------------------------------------------------------
     /////////////////-------------------------FIN CREATE -----------------------------------
@@ -1085,8 +1217,6 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         isContinuarUpdate = validarCondicionesPartidaAliada();
         if (isContinuarUpdate) {
-
-
 
 
 
@@ -1201,9 +1331,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
             //// ACTUALIZAR TEXTO DE TABLERO BASE:
             tableroBase.setText([
                 'DATOS BASE:',
-                'Vida de Torre: ' + this.torreControlAliada.vida + '%',
-                'Vida de Dep. Combustible: ' + this.deposito_combustibleAliado.vida + '%',
-                'Vida de Dep. Bombas: ' + this.deposito_bombasAliado.vida + '%',
+                'Vida de Torre: ' + torreControlAliada.vida + '%',
+                'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
                 'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
                 'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
             ]);
@@ -1251,9 +1381,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     //// ACTUALIZAR TEXTO DE TABLERO BASE:
                     tableroBase.setText([
                         'DATOS BASE:',
-                        'Vida de Torre: ' + this.torreControlAliada.vida + '%',
-                        'Vida de Dep. Combustible: ' + this.deposito_combustibleAliado.vida + '%',
-                        'Vida de Dep. Bombas: ' + this.deposito_bombasAliado.vida + '%',
+                        'Vida de Torre: ' + torreControlAliada.vida + '%',
+                        'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                        'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
                         'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
                         'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
                     ]);
@@ -1472,23 +1602,23 @@ export default class s7_campoBatalla extends Phaser.Scene {
 /////////////////-------------------------INICIO funciones y eventos de elementos base-----------------------------------
 /////////////////---------------------------------------------------------------------------------------
     function hayEnemigoEnRangoTorreDeControl(time){
-        sceneJuego.torreControlAliada.HayEnemigo = false;
-        sceneJuego.torreControlAliada.setTexture("torreControl_negro");
+        torreControlAliada.HayEnemigo = false;
+        torreControlAliada.setTexture("torreControl_negro");
         var arrayAvionesEnemigas=Gpo_AvionesEnemigos.getChildren();
-        if(sceneJuego.torreControlAliada.vida > 0){
+        if(torreControlAliada.vida > 0){
             //para cada avion enemiga
             for (j = 0; j < arrayAvionesEnemigas.length; j++){
                 if(arrayAvionesEnemigas[j].vida > 0){
                     //si distancia entre torre y avion < 100
-                    distanciaEntreDosObjetos = distanceRound(sceneJuego.torreControlAliada, arrayAvionesEnemigas[j]);
+                    distanciaEntreDosObjetos = distanceRound(torreControlAliada, arrayAvionesEnemigas[j]);
                     
-                    rangoMaximoVision = sceneJuego.torreControlAliada.rangoVision;
+                    rangoMaximoVision = torreControlAliada.rangoVision;
                     if (distanciaEntreDosObjetos <= rangoMaximoVision) {
                         //cambio att de torre
-                        sceneJuego.torreControlAliada.hayEnemigo = true;                    
-                        sceneJuego.torreControlAliada.setTexture("torreControl_negro_activo");  
+                        torreControlAliada.hayEnemigo = true;                    
+                        torreControlAliada.setTexture("torreControl_negro_activo");  
                         ////DISPARA UN EVENTO --> disparo bala fisica, imagen y sonido 
-                        evento_torreControl_disparo(time, sceneJuego.torreControlAliada, arrayAvionesEnemigas[j]);
+                        evento_torreControl_disparo(time, torreControlAliada, arrayAvionesEnemigas[j]);
                     }
                 }
             }
@@ -1496,22 +1626,22 @@ export default class s7_campoBatalla extends Phaser.Scene {
     }
 
     function hayAliadoEnRangoTorreDeControl(time){
-        sceneJuego.torreControlEnemiga.HayEnemigo = false;
-        sceneJuego.torreControlEnemiga.setTexture("torreControl_rojo");
+        torreControlEnemiga.HayEnemigo = false;
+        torreControlEnemiga.setTexture("torreControl_rojo");
         var arrayAvionesAliadas=Gpo_AvionesAliados.getChildren();
-        if(sceneJuego.torreControlEnemiga.vida > 0){
+        if(torreControlEnemiga.vida > 0){
             //para cada avion aliada
             for (j = 0; j < arrayAvionesAliadas.length; j++){
                 if(arrayAvionesAliadas[j].vida > 0){
                     //si distancia entre torre y avion < 100
-                    distanciaEntreDosObjetos = distanceRound(sceneJuego.torreControlEnemiga, arrayAvionesAliadas[j]);
-                    rangoMaximoVision = sceneJuego.torreControlEnemiga.rangoVision;
+                    distanciaEntreDosObjetos = distanceRound(torreControlEnemiga, arrayAvionesAliadas[j]);
+                    rangoMaximoVision = torreControlEnemiga.rangoVision;
                     if (distanciaEntreDosObjetos <= rangoMaximoVision) {
                         //cambio att de torre
-                        sceneJuego.torreControlEnemiga.hayEnemigo = true; 
-                        sceneJuego.torreControlEnemiga.setTexture("torreControl_rojo_activo");  
+                        torreControlEnemiga.hayEnemigo = true; 
+                        torreControlEnemiga.setTexture("torreControl_rojo_activo");  
                         ////DISPARA UN EVENTO --> disparo bala fisica, imagen y sonido 
-                        evento_torreControl_disparo(time, sceneJuego.torreControlEnemiga, arrayAvionesAliadas[j]);
+                        evento_torreControl_disparo(time, torreControlEnemiga, arrayAvionesAliadas[j]);
                     }
                 }
             }
@@ -1557,8 +1687,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         var newArtillero = null;
                 
         if (bando == "Aliado"){
-            x = sceneJuego.pistaAvionesAliada.x;
-            y = sceneJuego.pistaAvionesAliada.y;
+            x = pistaAvionesAliada.x;
+            y = pistaAvionesAliada.y;
 
             newArtillero = sceneJuego.physics.add.image(x,y,"artillero_negro");//.setDisplayOrigin(0, 0);   //(juego_var_nav_width*0.90-88)
             newArtillero.bando = "Aliado";
@@ -1570,8 +1700,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
             newArtillero.bullets_artillero_Aliada.physicsBodyType = Phaser.Physics.ARCADE;
             artilleroSetearUbicacion(newArtillero);
         }else{
-            x = sceneJuego.pistaAvionesEnemiga.x;
-            y = sceneJuego.pistaAvionesEnemiga.y; 
+            x = pistaAvionesEnemiga.x;
+            y = pistaAvionesEnemiga.y; 
 
             newArtillero = sceneJuego.physics.add.image(x,y,"artillero_rojo");//.setDisplayOrigin(0, 0);   //(juego_var_nav_width*0.90-88)
             newArtillero.bando = "Enemigo";
@@ -1801,8 +1931,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         /////CREO LOS N aviones en base a si es una partida nudeva son 4 y si es cargada lo n que tenia
         
         if (bando == "Aliado"){
-            x = sceneJuego.pistaAvionesAliada.x;
-            y = sceneJuego.pistaAvionesAliada.y;
+            x = pistaAvionesAliada.x;
+            y = pistaAvionesAliada.y;
 
             avion = sceneJuego.physics.add.image(x, y,"avionNegro");
             avion.bando = "Aliado";
@@ -1815,8 +1945,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
             //avion.mask = spotlight_instance;
         }else{
-            x = sceneJuego.pistaAvionesEnemiga.x;
-            y = sceneJuego.pistaAvionesEnemiga.y; 
+            x = pistaAvionesEnemiga.x;
+            y = pistaAvionesEnemiga.y; 
 
             avion = sceneJuego.physics.add.image(x,y,"avionRojo");
             avion.bando = "Enemigo";    
@@ -1858,11 +1988,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         }else{
             if (bando == "Aliado"){
-                x = sceneJuego.pistaAvionesAliada.x;
-                y = sceneJuego.pistaAvionesAliada.y;                
+                x = pistaAvionesAliada.x;
+                y = pistaAvionesAliada.y;                
             }else{
-                x = sceneJuego.pistaAvionesEnemiga.x;
-                y = sceneJuego.pistaAvionesEnemiga.y; 
+                x = pistaAvionesEnemiga.x;
+                y = pistaAvionesEnemiga.y; 
 
             }
             avion.x = x;
@@ -2334,26 +2464,52 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 function cargaElementosVistaLateral(){
     //VISTA LATERAL
-    sceneJuego.pisoLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'pisoLateral');
-    sceneJuego.pisoLateral.setDepth(100);
-    sceneJuego.pisoLateral.setVisible(false);
-    sceneJuego.pisoLateral.displayWidth    = campoAliado_w;
-    sceneJuego.pisoLateral.displayHeight   = campoAliado_h+campoEnemigo_h;
+    pisoLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'pisoLateral');
+    pisoLateral.setDepth(100);
+    pisoLateral.setVisible(false);
+    pisoLateral.displayWidth    = campoAliado_w;
+    pisoLateral.displayHeight   = campoAliado_h+campoEnemigo_h;
     
-    sceneJuego.separacionVertical = sceneJuego.add.image(50,0, 'separacionVertical');
-    sceneJuego.separacionVertical.setDepth(900);
-    sceneJuego.separacionVertical.setVisible(false);
-    sceneJuego.separacionVertical.displayWidth    = 300;
-    sceneJuego.separacionVertical.displayHeight   = 1200;
+    separacionVertical = sceneJuego.add.image(50,0, 'separacionVertical');
+    separacionVertical.setDepth(900);
+    separacionVertical.setVisible(false);
+    separacionVertical.displayWidth    = 300;
+    separacionVertical.displayHeight   = 1200;
 
 
     avionActivaAliadaLateral = sceneJuego.add.image(campoAliado_w/2, ((campoAliado_h+campoEnemigo_h)/2), 'avionIzquierdaComunNegra');
     avionActivaAliadaLateral.setVisible(false);
     avionActivaAliadaLateral.setDepth(100);
-    
-    sceneJuego.torreControlAliadaLateral = sceneJuego.add.image(800, ((campoAliado_h+campoEnemigo_h)/2), 'torreControl_VLateral_negra');
-    sceneJuego.torreControlAliadaLateral.setDepth(100);
 
+    avionActivaEnemigaLateral = sceneJuego.add.image(2000, 2000, 'avionDerechaComunRoja');
+    avionActivaEnemigaLateral.setVisible(false);
+    avionActivaEnemigaLateral.setDepth(100);
+    
+    pistaDeAvionAliadaLateral = sceneJuego.add.image(750, 500, 'pistaAvionesVLateral_negro');
+    pistaDeAvionAliadaLateral.setDepth(100);
+    pistaDeAvionAliadaLateral.scaleX = 1.5;
+    pistaDeAvionAliadaLateral.scaleY = 1.5;
+
+    depositoDeBombasAliadoLateral = sceneJuego.add.image(820, 400, 'deposito_bombas_negro');
+    depositoDeBombasAliadoLateral.setDepth(100);
+    depositoDeBombasAliadoLateral.scaleX = 1.5;
+    depositoDeBombasAliadoLateral.scaleY = 1.5;
+
+    torreControlAliadaLateral = sceneJuego.add.image(700, 400, 'torreControl_VLateral_negra');
+    torreControlAliadaLateral.setDepth(100);
+    torreControlAliadaLateral.scaleX = 2;
+    torreControlAliadaLateral.scaleY = 2;
+
+    depositoDeCombustibleAliadoLateral = sceneJuego.add.image(600, 470, 'deposito_combustible_negro');
+    depositoDeCombustibleAliadoLateral.setDepth(100);
+    depositoDeCombustibleAliadoLateral.scaleX = 1.5;
+    depositoDeCombustibleAliadoLateral.scaleY = 1.5;
+
+
+    pistaDeAvionAliadaLateral.setVisible(false);
+    depositoDeBombasAliadoLateral.setVisible(false);
+    torreControlAliadaLateral.setVisible(false);
+    depositoDeCombustibleAliadoLateral.setVisible(false);
 }
 
 function reanudarJuego ()
@@ -2364,10 +2520,16 @@ function reanudarJuego ()
 		/* sonidoReanudar.play();
 		opvReanudar();	
 		musicaFondo.play();*/
-		sceneJuego.separacionVertical.setVisible(false);
-		sceneJuego.pisoLateral.setVisible(false);
+		separacionVertical.setVisible(false);
+		pisoLateral.setVisible(false);
         avionActivaAliadaLateral.setVisible(false);
-        sceneJuego.torreControlAliadaLateral.setVisible(false);
+        avionActivaEnemigaLateral.setVisible(false);
+
+        pistaDeAvionAliadaLateral.setVisible(false);
+        depositoDeBombasAliadoLateral.setVisible(false);
+        torreControlAliadaLateral.setVisible(false);
+        depositoDeCombustibleAliadoLateral.setVisible(false);
+
 	}
 	if (!pausar){
 		// ALGO
@@ -2394,45 +2556,79 @@ function pausarJuego ()
             //Muestra Vista Lateral
             if (avionAliada_Activa.y > campoEnemigo_h) {
                 avionActivaAliadaLateral.setVisible(true);
+                switch (avionAliada_Activa.z){
+                    case 0:
+                        avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-350;
+                        avionActivaAliadaLateral.scaleX=0.8;
+                        avionActivaAliadaLateral.scaleY=0.8;
+                        break;
+                    case 100:
+                        avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-450;
+                        avionActivaAliadaLateral.scaleX=0.5;
+                        avionActivaAliadaLateral.scaleY=0.5;
+                        break;
+                    case 200:
+                        avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-550;
+                        avionActivaAliadaLateral.scaleX=0.3;
+                        avionActivaAliadaLateral.scaleY=0.3;
+                        break;
+                }
+                y = avionAliada_Activa.y;
+                x = dadoVistaAereaY_obtengoUnXParaLateral(y);
+                avionActivaAliadaLateral.x = x;
+
+
             }
-			sceneJuego.pisoLateral.setVisible(true);
-            sceneJuego.separacionVertical.setVisible(true);
-            sceneJuego.torreControlAliadaLateral.setVisible(true);
+            if (avionEnemiga_Activa.y > campoEnemigo_h) {
+                avionActivaEnemigaLateral.setVisible(true);
+
+                switch (avionEnemiga_Activa.z){
+                    case 0:
+                        avionActivaEnemigaLateral.y=(campoAliado_h+campoEnemigo_h)-350;
+                        avionActivaEnemigaLateral.scaleX=0.8;
+                        avionActivaEnemigaLateral.scaleY=0.8;
+                        break;
+                    case 100:
+                        avionActivaEnemigaLateral.y=(campoAliado_h+campoEnemigo_h)-450;
+                        avionActivaEnemigaLateral.scaleX=0.5;
+                        avionActivaEnemigaLateral.scaleY=0.5;
+                        break;
+                    case 200:
+                        avionActivaEnemigaLateral.y=(campoAliado_h+campoEnemigo_h)-550;
+                        avionActivaEnemigaLateral.scaleX=0.3;
+                        avionActivaEnemigaLateral.scaleY=0.3;
+                        break;
+                }
+                y = avionEnemiga_Activa.y;
+                x = dadoVistaAereaY_obtengoUnXParaLateral(y);
+                avionActivaEnemigaLateral.x = x;
+
+            }
+
+
+			pisoLateral.setVisible(true);
+            separacionVertical.setVisible(true);
+
+            pistaDeAvionAliadaLateral.setVisible(true);
+            depositoDeBombasAliadoLateral.setVisible(true);
+            torreControlAliadaLateral.setVisible(true);
+            depositoDeCombustibleAliadoLateral.setVisible(true);
             
             var sgm_pantalla = (campoAliado_h+campoEnemigo_h)/3;
-            switch (avionAliada_Activa.z){
-                case 0:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-350;
-                    avionActivaAliadaLateral.scaleX=0.8;
-                    avionActivaAliadaLateral.scaleY=0.8;
-                    break;
-                case 100:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-450;
-                    avionActivaAliadaLateral.scaleX=0.5;
-                    avionActivaAliadaLateral.scaleY=0.5;
-                    break;
-                case 200:
-                    avionActivaAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-550;
-                    avionActivaAliadaLateral.scaleX=0.3;
-                    avionActivaAliadaLateral.scaleY=0.3;
-                    break;
-            }	
+	
+            if (torreControlAliada.hayEnemigo) {
+                torreControlAliadaLateral.setTexture("torreControl_VLateral_negra_activa");
+            }else{
+                torreControlAliadaLateral.setTexture("torreControl_VLateral_negra");
+            }
 
-            y = avionAliada_Activa.y;
-            x = dadoVistaAereaY_obtengoUnXParaLateral(y);
-            avionActivaAliadaLateral.x = x;
 
-            /// DIBUJAR LOS ELEMENTOS DE LA BASE.
-            sceneJuego.torreControlAliadaLateral.x=200;
-            sceneJuego.torreControlAliadaLateral.y=(campoAliado_h+campoEnemigo_h)-70;
 	}else{
-        sceneJuego.pisoLateral.setVisible(false);
+        pisoLateral.setVisible(false);
     }
 }
 
 function dadoVistaAereaY_obtengoUnXParaLateral(vistaAereaY){
-    console.log("IN vistaAereaY::"+vistaAereaY);
-
     var vistaLateralX=100;
 
     ////vista aerea va entre 300 y 600, o sea, mi 100% es 300
@@ -2453,6 +2649,5 @@ function dadoVistaAereaY_obtengoUnXParaLateral(vistaAereaY){
     var valorEnPXLateralesAntesDeSalir = (xEntranteQueTengoDeAntes*800) / 100;
     vistaLateralX = valorEnPXLateralesAntesDeSalir+100;
 
-    console.log("OUT vistaLateralX::"+vistaLateralX);
     return vistaLateralX;
 }

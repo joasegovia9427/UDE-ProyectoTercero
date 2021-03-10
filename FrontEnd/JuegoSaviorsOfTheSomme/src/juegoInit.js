@@ -16,8 +16,8 @@ import s6_lineaFrontera from './s6_lineaFrontera.js';
 import s3_vistaLateral from './s3_vistaLateral.js';
 import s4_tableroInfo from './s4_tableroInfo.js';
 import s5_menu from './s5_menu.js'; 
-//import s7_campoBatalla from './s7_campoBatalla.js';
-import s7_campoBatalla2 from './s7_campoBatalla2.js';
+import s7_campoBatalla from './s7_campoBatalla.js';
+//import s7_campoBatalla2 from './s7_campoBatalla2.js';
 
 /* juego_var_nav_width = window.innerWidth
 || document.documentElement.clientWidth
@@ -39,7 +39,7 @@ const config = {
     parent: 'phaser-app',
     width: juego_var_nav_width, //(juego_var_nav_width) - 20,
     height: juego_var_nav_height, //(juego_var_nav_height) - 20,   
-    scene: [s7_campoBatalla2], //s3_vistaLateral, s4_tableroInfo, s5_menu
+    scene: [s7_campoBatalla], //s3_vistaLateral, s4_tableroInfo, s5_menu
 	physics: {
 		default: "arcade",
 		arcade: {
