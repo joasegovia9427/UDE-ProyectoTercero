@@ -229,6 +229,7 @@ webSocket.onopen = function(event) {
     } else {
         jugadorMiNumero = 2;
     }
+    jugadorMiNumero = 1;
     console.log("Me toco ser el jugadorMiNumero::"+ jugadorMiNumero);
 
     console.log("WebSocket is open now.");
@@ -436,7 +437,7 @@ function sendDatosWebSocket(){
 
         rows =
         { "partidaId": partidaID
-        , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+        , "isIngresoPorPrimeraVez": false
         , "sessionId": mi_SessId
         , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
         , "cabezalDatosPrincipalesEnemigos": true
@@ -455,7 +456,24 @@ function sendDatosWebSocket(){
                 
         //artilleroA_1
 
+        , "cabezalDatosTorretasEnemigos": true
+
+        , "datosTorretas1x": artilleroA_1.x
+        , "datosTorretas1y": artilleroA_1.y
+        , "datosTorretas2x": artilleroA_2.x
+        , "datosTorretas2y": artilleroA_2.y
+        , "datosTorretas3x": artilleroA_3.x
+        , "datosTorretas3y": artilleroA_3.y
+        , "datosTorretas4x": artilleroA_4.x
+        , "datosTorretas4y": artilleroA_4.y
+        , "datosTorretas5x": artilleroA_5.x
+        , "datosTorretas5y": artilleroA_5.y
+        , "datosTorretas6x": artilleroA_6.x
+        , "datosTorretas6y": artilleroA_6.y
+
+
         };
+
         dataJson = JSON.stringify(rows);
 
         console.log("isEnvioMisDatosBase dataJson::" + dataJson);
@@ -468,7 +486,7 @@ function sendDatosWebSocket(){
     }else{
 
 
-        rows =
+/*         rows =
         { "partidaId": partidaID
         , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
         , "sessionId": mi_SessId
@@ -486,7 +504,7 @@ function sendDatosWebSocket(){
         if (isWSOpen) {
             console.log("dataJson::"+dataJson);
             webSocket.send(dataJson);
-        }
+        } */
     }
 
 }
@@ -1289,7 +1307,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 modificoDireccion = true;
                 var cursors = this.input.keyboard.createCursorKeys();
                 //var duration = this.cursors.getDuration();
-                console.log(this.duration);
+                //console.log(this.duration);
                 
                /*  if (ultimaTeclaPresionada != ultimaTeclaPresionadaAux) {
                     ultimaTeclaPresionadaAux = ultimaTeclaPresionada;
@@ -1897,6 +1915,43 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }
 
         }  
+
+
+        rows =
+        { "partidaId": partidaID
+        , "isIngresoPorPrimeraVez": false
+        , "sessionId": mi_SessId
+        , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+        , "cabezalDatosPrincipalesEnemigos": false
+        , "cabezalDatosTorretasEnemigos": true
+
+        , "datosTorretas1x": artilleroA_1.x
+        , "datosTorretas1y": artilleroA_1.y
+        , "datosTorretas2x": artilleroA_2.x
+        , "datosTorretas2y": artilleroA_2.y
+        , "datosTorretas3x": artilleroA_3.x
+        , "datosTorretas3y": artilleroA_3.y
+        , "datosTorretas4x": artilleroA_4.x
+        , "datosTorretas4y": artilleroA_4.y
+        , "datosTorretas5x": artilleroA_5.x
+        , "datosTorretas5y": artilleroA_5.y
+        , "datosTorretas6x": artilleroA_6.x
+        , "datosTorretas6y": artilleroA_6.y
+  
+        };
+
+        dataJson = JSON.stringify(rows);
+        console.log("cabezalDatosTorretasEnemigos dataJson::" + dataJson);
+
+        if (isWSOpen) {
+            webSocket.send(dataJson);
+        }
+   
+
+
+       
+                
+
     } // artillero setear oncollide function with Base
 
 /////////////////---------------------------------------------------------------------------------------

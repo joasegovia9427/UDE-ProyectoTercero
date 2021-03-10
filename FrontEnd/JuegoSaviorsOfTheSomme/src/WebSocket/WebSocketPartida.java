@@ -128,7 +128,7 @@ public class WebSocketPartida {
 							textoRespuestaJson = jsonDataObject.toString();
 							msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 							///si entre por primera vez a mi mismo me mando mis datos para confirmar y para que guarde mi sessID
-							in_Session.getBasicRemote().sendText(textoRespuestaJson);
+							//in_Session.getBasicRemote().sendText(textoRespuestaJson);
 //			                Thread.sleep(100);
 //			            }
 						
@@ -170,7 +170,7 @@ public class WebSocketPartida {
 								textoRespuestaJson = jsonDataObject.toString();
 								msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 	
-								in_Session.getBasicRemote().sendText(textoRespuestaJson);
+								//in_Session.getBasicRemote().sendText(textoRespuestaJson);
 								
 //				                Thread.sleep(100);
 //				            }

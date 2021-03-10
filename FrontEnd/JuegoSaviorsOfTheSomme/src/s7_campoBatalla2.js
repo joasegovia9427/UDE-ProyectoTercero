@@ -162,9 +162,11 @@ var avionEnemiga_ActivaVy;
 var avionAliada_ActivaVx;
 var avionAliada_ActivaVy;
 
+var isEnvioMisDatosBase = true;
+
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
 
-/*
+
 /////----------------------------------------------------------------------------------
 /////----------------------------------------------------------------------------------
 /////----------------------------------------------------------------------------------
@@ -183,14 +185,19 @@ var datosRecibidosDesdeJugadorNumero;
 
 var jugadorMiNumero = 0;
 
+var cabezalDatosPrincipalesEnemigos = false;
+
 ///// METODOS WEBSOCKETS
 webSocket.onopen = function(event) {
-    var numRandomAux = Math.round(Math.random() * 10);
+    /* var numRandomAux = Math.round(Math.random() * 10);
     if (numRandomAux > 5) {
         jugadorMiNumero = 1;
     } else {
         jugadorMiNumero = 2;
     }
+     */
+
+    jugadorMiNumero = 2;
     console.log("Me toco ser el jugadorMiNumero::"+ jugadorMiNumero);
 
     console.log("WebSocket is open now.");
@@ -210,7 +217,7 @@ webSocket.onopen = function(event) {
     }
 };
 
-webSocket.onclose = function(event) {
+/* webSocket.onclose = function(event) {
     webSocket.send("dato a enviar de cierre del websocket");
     isWSOpen = "false";
 
@@ -219,14 +226,14 @@ webSocket.onclose = function(event) {
     console.log('code is' + event.code);
     console.log('reason is ' + event.reason);
     console.log('wasClean  is' + event.wasClean);
-};
+}; */
 
-webSocket.onerror = function(event) {
+/* webSocket.onerror = function(event) {
     alert("Error con el WebSocket ***Verifique que el server este prendido: " + event, event );
-}; 
+};  */
 
 ///// METODOS EVENTOS DE NAVEGADOR Y PESTAÑA
-window.addEventListener('beforeunload', function (e) {   
+/* window.addEventListener('beforeunload', function (e) {   
     isWSOpen = "false";
     webSocket.send("dato a mandar como que cerre pestaña");
     
@@ -240,7 +247,7 @@ window.addEventListener('beforeunload', function (e) {
     
   } 
   
-); 
+);  */
 
 function onMessage(event) {
     console.log("-------function onMessage(event)---------------------------");
@@ -256,7 +263,8 @@ function onMessage(event) {
 
     if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
         ////sincronizo mis datos
-        isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
+        console.log("ahora nunca deberia entrar aca");
+       /*  isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
         console.log("isIngresoPorPrimeraVez: "+isIngresoPorPrimeraVez);
         if ( (data.sessionId != mi_SessId) && (mi_SessId != "mi_sessIdToChange") ) {
             console.log("algo raro paso, entro con el mismo numero de juego y ademas que no entro por primera vez, o sea entro posterior, y ademas con diferente sessID");
@@ -273,54 +281,54 @@ function onMessage(event) {
             , "sessionId": mi_SessId
             , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
             //, "arreLista" : [lista, lista2]
-            };
+            }; */
  
     } else {
-        ////sino, me estan llegando datos del enemigo...
-        //// sincronizo los datos de los elementos enemigos
-        isTrajoDatosEnemigos = true;
 
-        contrincante_SessId = data.sessionId;
-        //console.log("contrincante_SessId: "+contrincante_SessId);
 
-        x = data.avionActivaX;
-        y = data.avionActivaY;
+        cabezalDatosPrincipalesEnemigos = data.cabezalDatosPrincipalesEnemigos;
+        console.log("cabezalDatosPrincipalesEnemigos: "+cabezalDatosPrincipalesEnemigos);
 
-        console.log("x y :::"+ x + " -- " + y)
+        if (cabezalDatosPrincipalesEnemigos) {
+            //sincronizo datos de base de enemigo
+            console.log("entro al if cabezalDatosPrincipalesEnemigos");
 
-        in_avionEnemigaActivaX = (1000 - x);
-        in_avionEnemigaActivaY = (600 - y);
+            sceneJuego.deposito_bombasAliado.x = data.deposito_bombasAliadoX;
+            sceneJuego.deposito_bombasAliado.y = data.deposito_bombasAliadoY;
+            
+            sceneJuego.torreControlAliada.x = data.torreControlAliadaX;
+            sceneJuego.torreControlAliada.y = data.torreControlAliadaY;
+          
+            sceneJuego.deposito_combustibleAliado.x = data.deposito_combustibleAliadoX;
+            sceneJuego.deposito_combustibleAliado.y = data.deposito_combustibleAliadoY;
+           
+            sceneJuego.pistaAvionesAliada.x = data.pistaAvionesAliadaX;
+            sceneJuego.pistaAvionesAliada.y = data.pistaAvionesAliadaY;
+            
+
+        } 
         
-        //console.log("in_avionEnemigaActiva x y :::"+ in_avionEnemigaActivaX + " -- " + in_avionEnemigaActivaY)
+        var cabezalDatosTorretasEnemigos = data.cabezalDatosTorretasEnemigos;
+            console.log("cabezalDatosTorretasEnemigos: "+cabezalDatosTorretasEnemigos);
+            
+        if (cabezalDatosTorretasEnemigos) {
+            console.log("entro a actualizar");
+            artilleroA_1.x = data.datosTorretas1x;
+            artilleroA_1.y = data.datosTorretas1y;
+            artilleroA_2.x = data.datosTorretas2x;
+            artilleroA_2.y = data.datosTorretas2y;
+            artilleroA_3.x = data.datosTorretas3x;
+            artilleroA_3.y = data.datosTorretas3y;
+            artilleroA_4.x = data.datosTorretas4x;
+            artilleroA_4.y = data.datosTorretas4y;
+            artilleroA_5.x = data.datosTorretas5x;
+            artilleroA_5.y = data.datosTorretas5y;
+            artilleroA_6.x = data.datosTorretas6x;
+            artilleroA_6.y = data.datosTorretas6y;
 
-
-        x = data.avionActivaVx;
-        y = data.avionActivaVY;
-        //console.log("Vx Vy :::"+ x + " -- " + y)
-
-        in_avionEnemiga_ActivaVx = (x*-1);
-        in_avionEnemiga_ActivaVy = (y*-1);
-        
-        //console.log("in_avionEnemigaActiva Vx Vy :::"+ in_avionEnemiga_ActivaVx + " -- " + in_avionEnemiga_ActivaVy)
-        
-        avionEnemiga_Activa.resetFlip();
-
-        x = data.avionActivaAngulo;
-        y = (x*-1);
-        avionEnemiga_Activa.angle = y;  
-        
-        if (y==0) {
-            x = data.avionActivaFlipX;        
-            avionEnemiga_Activa.flipX = !x; 
+               
         }
 
-        avionEnemiga_Activa.x = in_avionEnemigaActivaX;
-        avionEnemiga_Activa.y = in_avionEnemigaActivaY;
-        avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
-        avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
-        setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
-
-    
    
     }
 
@@ -329,26 +337,49 @@ function onMessage(event) {
  }
  
 function sendDatosWebSocket(){
+    if (isEnvioMisDatosBase) {
+        console.log("entro a isEnvioMisDatosBase");
 
-    rows =
-    { "partidaId": partidaID
-    , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-    , "sessionId": mi_SessId
-    , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-    , "avionActivaX": avionAliada_Activa.x
-    , "avionActivaY": avionAliada_Activa.y
-    , "avionActivaVx": avionAliada_ActivaVx
-    , "avionActivaVY": avionAliada_ActivaVy
-    , "avionActivaAngulo": avionAliada_Activa.angle
-    , "avionActivaFlipX": avionAliada_Activa.flipX
-    //, "arreLista" : [lista, lista2]
-    };
-    dataJson = JSON.stringify(rows);
-    if (isWSOpen) {
-        console.log("dataJson::"+dataJson);
-        webSocket.send(dataJson);
+        isEnvioMisDatosBase = false;
+
+        rows =
+        { "partidaId": partidaID
+        , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+        , "sessionId": mi_SessId
+        , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+
+
+        , "cabezalDatosPrincipalesEnemigos": true
+
+        , "deposito_bombasAliadoX": sceneJuego.deposito_bombasEnemigo.x
+        , "deposito_bombasAliadoY": sceneJuego.deposito_bombasEnemigo.y
+
+        , "torreControlAliadaX": sceneJuego.torreControlEnemiga.x
+        , "torreControlAliadaY": sceneJuego.torreControlEnemiga.y
+
+        , "deposito_combustibleAliadoX": sceneJuego.deposito_combustibleEnemigo.x
+        , "deposito_combustibleAliadoY": sceneJuego.deposito_combustibleEnemigo.y
+
+        , "pistaAvionesAliadaX": sceneJuego.pistaAvionesEnemiga.x
+        , "pistaAvionesAliadaY": sceneJuego.pistaAvionesEnemiga.y
+                
+        //artilleroA_1
+
+        };
+        dataJson = JSON.stringify(rows);
+
+        console.log("isEnvioMisDatosBase dataJson::" + dataJson);
+
+        if (isWSOpen) {
+            webSocket.send(dataJson);
+        }
+  
+        
+    }else{
+        ///
+
+        
     }
-
 
 }
 
@@ -864,7 +895,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
 
         /// APLICO SOMBRA A AQUELLO QUE QUIERA ENMASCARAR: ARTILLEROS, ELEMENTOS DE BASE+AVIONES
 
-            avionAliada_Activa.mask = spotlight_instance;
+/*             avionAliada_Activa.mask = spotlight_instance;
             this.pisoEnemigo.mask = spotlight_instance;
             artilleroA_1.mask = spotlight_instance;
             artilleroA_2.mask = spotlight_instance;
@@ -876,7 +907,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
             this.pistaAvionesAliada.mask = spotlight_instance;
             this.deposito_bombasAliado.mask = spotlight_instance;
             this.deposito_combustibleAliado.mask = spotlight_instance;
- 
+  */
 
         ///aplico a los elementos enemigos
 
@@ -1125,7 +1156,7 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
             }
             
             /////---------FISICAS DE AVIONES y BALAS ENEMIGAS------
-            setMaksAvion(avionAliada_Activa);
+///////////////setMaksAvion(avionAliada_Activa);
 
             //// ACTUALIZAR TEXTO DE TABLERO BASE:
             tableroBase.setText([
@@ -1261,16 +1292,16 @@ export default class s7_campoBatalla2 extends Phaser.Scene {
         }
     }
     function evento_tecla_avionDireccion_D(){
-       //sendDatosWebSocket();
+       sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_A(){
-        //sendDatosWebSocket();
+        sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_W(){
-        //sendDatosWebSocket();
+        sendDatosWebSocket();
     }
     function evento_tecla_avionDireccion_S(){
-        //sendDatosWebSocket();
+        sendDatosWebSocket();
     }
 
     function evento_tecla_avionAltura0(){
