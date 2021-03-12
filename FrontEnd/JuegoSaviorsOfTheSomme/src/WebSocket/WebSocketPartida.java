@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,12 +30,17 @@ public class WebSocketPartida {
 	////// SINGLETON
 	private static WebSocketPartida webSocketUnicaInstancia; 
 	
-	////Colección de SESSION, para todo el websocket
-	private static Set<Session> webSocketAllSessions = new HashSet<>();
+//	////Colección de SESSION, para todo el websocket
+//	private static Set<Session> webSocketAllSessions = new HashSet<>();
+//	
+//	////Colección de {PARTIDA,{SESSION}} para guardar esa asociación, para todo el websocket
+//	private static Map<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
+//	
 	
-	////Colección de {PARTIDA,{SESSION}} para guardar esa asociación, para todo el websocket
-	private static Map<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
+
 	
+	private static HashMap<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
+    private static Set<Session> webSocketAllSessions = Collections.synchronizedSet(new HashSet<Session>());
 	
     @OnOpen
 	public static WebSocketPartida getInstancia(Session in_Session) {  ////antes era public void onOpen(Session session) {
@@ -116,17 +122,17 @@ public class WebSocketPartida {
 	
 						
 						////modifico el campo existente, si no funciona, borro el actual y agrego nuevamente jsonDataObject.remove(key);
-						jsonDataObject.put("isIngresoPorPrimeraVez", false);
+						//jsonDataObject.put("isIngresoPorPrimeraVez", false);
 						//// modifico campo el cual contiene la sessionID, solo para que quede eso... 
-		        		jsonDataObject.put("sessionId", in_sessionId);
+		        		//jsonDataObject.put("sessionId", in_sessionId);
 		        		
 						
 //						for (int c = 0; c <= 10; c++) {
 //			        		jsonDataObject.put("contador", c);
 //			        		
 							////retorno mi JSON a mi in_Session
-							textoRespuestaJson = jsonDataObject.toString();
-							msgConsola("textoRespuestaJson::"+textoRespuestaJson);
+							//textoRespuestaJson = jsonDataObject.toString();
+							//msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 							///si entre por primera vez a mi mismo me mando mis datos para confirmar y para que guarde mi sessID
 							//in_Session.getBasicRemote().sendText(textoRespuestaJson);
 //			                Thread.sleep(100);
@@ -157,18 +163,18 @@ public class WebSocketPartida {
 							////retorno en un tercer, que quedo ingresada en el arbol y que ya no vuelva a mandar ese dato de primera vez en el json
 							
 							////modifico el campo existente, si no funciona, borro el actual y agrego nuevamente jsonDataObject.remove(key);
-							jsonDataObject.put("isIngresoPorPrimeraVez", false);
+							//jsonDataObject.put("isIngresoPorPrimeraVez", false);
 							
 							//// y un cuarto campo el cual contiene la sessionID, solo para que quede eso... 
-							jsonDataObject.put("sessionId", in_sessionId);
+							//jsonDataObject.put("sessionId", in_sessionId);
 							
 							
 //							for (int c = 0; c <= 10; c++) {
 //				        		jsonDataObject.put("contador", c);
 //				        		
 								////retorno mi JSON a mi in_Session
-								textoRespuestaJson = jsonDataObject.toString();
-								msgConsola("textoRespuestaJson::"+textoRespuestaJson);
+								//textoRespuestaJson = jsonDataObject.toString();
+								//msgConsola("textoRespuestaJson::"+textoRespuestaJson);
 	
 								//in_Session.getBasicRemote().sendText(textoRespuestaJson);
 								
@@ -345,14 +351,14 @@ public class WebSocketPartida {
     
     ////Pasar estos 3 a un utilitarios luego en el proyecto general
     public static void msgConsola(String in_msgToConsole) {
-    	printCompleteDateTime();
-        System.out.println(in_msgToConsole.trim());
+    	//printCompleteDateTime();
+        //System.out.println(in_msgToConsole.trim());
     }
 
     public static void msgConsolaEspacios() {
-        System.out.println(" ");
-        System.out.println(" ");
-        System.out.println(" ");
+//        System.out.println(" ");
+//        System.out.println(" ");
+//        System.out.println(" ");
     }
     
 	public static void printCompleteDateTime() {

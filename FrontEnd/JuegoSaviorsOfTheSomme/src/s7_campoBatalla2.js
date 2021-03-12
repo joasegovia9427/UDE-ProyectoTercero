@@ -185,7 +185,7 @@ var datosRecibidosDesdeJugadorNumero;
 
 var jugadorMiNumero = 0;
 
-var cabezalDatosPrincipalesEnemigos = false;
+var datosASync;
 
 ///// METODOS WEBSOCKETS
 webSocket.onopen = function(event) {
@@ -262,76 +262,104 @@ function onMessage(event) {
     console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
 
     if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
-        ////sincronizo mis datos
-        console.log("ahora nunca deberia entrar aca");
-       /*  isIngresoPorPrimeraVez = data.isIngresoPorPrimeraVez;
-        console.log("isIngresoPorPrimeraVez: "+isIngresoPorPrimeraVez);
-        if ( (data.sessionId != mi_SessId) && (mi_SessId != "mi_sessIdToChange") ) {
-            console.log("algo raro paso, entro con el mismo numero de juego y ademas que no entro por primera vez, o sea entro posterior, y ademas con diferente sessID");
-            console.log("data.sessionId::"+data.sessionId);
-            console.log("mi_SessId previa::"+mi_SessId);
-        }
-        mi_SessId = data.sessionId;
-        console.log("mi_SessId: "+mi_SessId);
-
-
-        rows =
-            { "partidaId": partidaID
-            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-            , "sessionId": mi_SessId
-            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-            //, "arreLista" : [lista, lista2]
-            }; */
+ 
  
     } else {
 
+        datosASync = data.datos;
+        console.log("etiqueta:: datosASync: "+datosASync);
 
-        cabezalDatosPrincipalesEnemigos = data.cabezalDatosPrincipalesEnemigos;
-        console.log("cabezalDatosPrincipalesEnemigos: "+cabezalDatosPrincipalesEnemigos);
 
-        if (cabezalDatosPrincipalesEnemigos) {
-            //sincronizo datos de base de enemigo
-            console.log("entro al if cabezalDatosPrincipalesEnemigos");
-
-            sceneJuego.deposito_bombasAliado.x = data.deposito_bombasAliadoX;
-            sceneJuego.deposito_bombasAliado.y = data.deposito_bombasAliadoY;
-            
-            sceneJuego.torreControlAliada.x = data.torreControlAliadaX;
-            sceneJuego.torreControlAliada.y = data.torreControlAliadaY;
-          
-            sceneJuego.deposito_combustibleAliado.x = data.deposito_combustibleAliadoX;
-            sceneJuego.deposito_combustibleAliado.y = data.deposito_combustibleAliadoY;
-           
-            sceneJuego.pistaAvionesAliada.x = data.pistaAvionesAliadaX;
-            sceneJuego.pistaAvionesAliada.y = data.pistaAvionesAliadaY;
-            
-
-        } 
-        
-        var cabezalDatosTorretasEnemigos = data.cabezalDatosTorretasEnemigos;
-            console.log("cabezalDatosTorretasEnemigos: "+cabezalDatosTorretasEnemigos);
-            
-        if (cabezalDatosTorretasEnemigos) {
-            console.log("entro a actualizar");
-            artilleroA_1.x = data.datosTorretas1x;
-            artilleroA_1.y = data.datosTorretas1y;
-            artilleroA_2.x = data.datosTorretas2x;
-            artilleroA_2.y = data.datosTorretas2y;
-            artilleroA_3.x = data.datosTorretas3x;
-            artilleroA_3.y = data.datosTorretas3y;
-            artilleroA_4.x = data.datosTorretas4x;
-            artilleroA_4.y = data.datosTorretas4y;
-            artilleroA_5.x = data.datosTorretas5x;
-            artilleroA_5.y = data.datosTorretas5y;
-            artilleroA_6.x = data.datosTorretas6x;
-            artilleroA_6.y = data.datosTorretas6y;
-
+        switch (datosASync) {
+            case "datosBaseYArtillerosPriVez":
+                sceneJuego.deposito_bombasAliado.x = data.deposito_bombasAliadoX;
+                sceneJuego.deposito_bombasAliado.y = data.deposito_bombasAliadoY;
+                
+                sceneJuego.torreControlAliada.x = data.torreControlAliadaX;
+                sceneJuego.torreControlAliada.y = data.torreControlAliadaY;
+              
+                sceneJuego.deposito_combustibleAliado.x = data.deposito_combustibleAliadoX;
+                sceneJuego.deposito_combustibleAliado.y = data.deposito_combustibleAliadoY;
                
+                sceneJuego.pistaAvionesAliada.x = data.pistaAvionesAliadaX;
+                sceneJuego.pistaAvionesAliada.y = data.pistaAvionesAliadaY;
+            
+                avionAliada_Activa.x = sceneJuego.pistaAvionesAliada.x;
+                avionAliada_Activa.y = sceneJuego.pistaAvionesAliada.y;
+
+                artilleroA_1.x = data.datosArtilleros1x;
+                artilleroA_1.y = data.datosArtilleros1y;
+                artilleroA_2.x = data.datosArtilleros2x;
+                artilleroA_2.y = data.datosArtilleros2y;
+                artilleroA_3.x = data.datosArtilleros3x;
+                artilleroA_3.y = data.datosArtilleros3y;
+                artilleroA_4.x = data.datosArtilleros4x;
+                artilleroA_4.y = data.datosArtilleros4y;
+                artilleroA_5.x = data.datosArtilleros5x;
+                artilleroA_5.y = data.datosArtilleros5y;
+                artilleroA_6.x = data.datosArtilleros6x;
+                artilleroA_6.y = data.datosArtilleros6y;
+                
+                break;
+            case "datosArtillerosByTimer":
+                artilleroA_1.x = data.datosArtilleros1x;
+                artilleroA_1.y = data.datosArtilleros1y;
+                artilleroA_2.x = data.datosArtilleros2x;
+                artilleroA_2.y = data.datosArtilleros2y;
+                artilleroA_3.x = data.datosArtilleros3x;
+                artilleroA_3.y = data.datosArtilleros3y;
+                artilleroA_4.x = data.datosArtilleros4x;
+                artilleroA_4.y = data.datosArtilleros4y;
+                artilleroA_5.x = data.datosArtilleros5x;
+                artilleroA_5.y = data.datosArtilleros5y;
+                artilleroA_6.x = data.datosArtilleros6x;
+                artilleroA_6.y = data.datosArtilleros6y;
+                break;
+    
+            case "datosArtilleroByOverlap":     
+                x = data.datosArtilleroX;
+                y = data.datosArtilleroY;  
+                switch (data.datosArtilleroNum) {
+                    case 1:
+                        artilleroA_1.x = x;
+                        artilleroA_1.y = y;
+                        break;
+                    case 2:
+                        artilleroA_2.x = x;
+                        artilleroA_2.y = y;
+                        break;
+                    case 3:
+                        artilleroA_3.x = x;
+                        artilleroA_3.y = y;
+                        break;
+                    case 4:
+                        artilleroA_4.x = x;
+                        artilleroA_4.y = y;
+                        break;
+                    case 5:
+                        artilleroA_5.x = x;
+                        artilleroA_5.y = y;
+                        break;
+                    case 6:
+                        artilleroA_6.x = x;
+                        artilleroA_6.y = y;
+                        break;
+                }
+                
+
+            break;
+            
+            case "datosAvion":
+                
+                break;
+            case "datosEvento1":
+                
+                break;
         }
+
 
    
     }
-
 
 
  }
