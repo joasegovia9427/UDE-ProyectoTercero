@@ -35,7 +35,7 @@ juego_var_nav_height = 600; */
 const config = {
 	transparent: true,
 	backgroundColor: 'rgba(0, 0, 0, 0)',
-    type: Phaser.AUTO,
+    type: Phaser.AUTO, //type: Phaser.AUTO,
     parent: 'phaser-app',
     width: juego_var_nav_width, //(juego_var_nav_width) - 20,
     height: juego_var_nav_height, //(juego_var_nav_height) - 20,   
@@ -44,7 +44,7 @@ const config = {
 		default: "arcade",
 		arcade: {
 		  debug: false,
-		  //fps: 60,
+		  //fps: 24,
 		},
 	}
 };
