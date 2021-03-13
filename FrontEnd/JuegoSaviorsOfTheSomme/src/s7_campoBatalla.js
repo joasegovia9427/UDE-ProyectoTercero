@@ -27,7 +27,7 @@ var cantidadAvionesEnemigas     = 0;
 var cantidadArtillerosAliadas   = 0;
 var cantidadArtillerosEnemigas  = 0; 
 
-var pausar=false;
+var isEnVistaLateral=false;
 
 /* var arrayAvionesAliadas      = [];
 var arrayAvionesEnemigas        = [];
@@ -196,7 +196,8 @@ var avionEnemiga_ActivaVy;
 var avionAliada_ActivaVx;
 var avionAliada_ActivaVy;
 
-var isInPause = false;
+var isInVistaLateral = false;
+var isEnPausaMenu = false;
 
 /////---------^^^^^^^^^^^^FIN VARIABLES GLOBALES^^^^^^^^^^^^----------
 
@@ -290,300 +291,271 @@ webSocket.onerror = function(event) {
 );  */
 
 function onMessage(event) {
-    //console.log("-------function onMessage(event)---------------------------");
-    ////todos los datos que me manda tanto el server por primera vez, 
-    //// como todo el resto de datos que me manda el enemigo para actualizar sus objetos y eventos
+
+    isContinuarUpdate = validarCondicionesPartidaAliada();
+    if (isContinuarUpdate) {
+
+        //console.log("-------function onMessage(event)---------------------------");
+        ////todos los datos que me manda tanto el server por primera vez, 
+        //// como todo el resto de datos que me manda el enemigo para actualizar sus objetos y eventos
+        
+        //console.log("onMessage event.data:"+event.data);
+        var data = JSON.parse(event.data);
+        //console.log("data:"+data);
+
+        datosRecibidosDesdeJugadorNumero = data.enviaDatoDesdeElJugadorNum;
+        //console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
+
+        if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
     
-
-
-    //console.log("onMessage event.data:"+event.data);
-    var data = JSON.parse(event.data);
-    //console.log("data:"+data);
-
-
-    datosRecibidosDesdeJugadorNumero = data.enviaDatoDesdeElJugadorNum;
-    //console.log("datosRecibidosDesdeJugadorNumero: "+datosRecibidosDesdeJugadorNumero);
-
-    if (datosRecibidosDesdeJugadorNumero == jugadorMiNumero) {
- 
- 
-    } else {
-
-        datosASync = data.datos;
-        //console.log("etiqueta:: datosASync: "+datosASync);
-
-        switch (datosASync) {
-            case "datosBaseYArtillerosPriVez":
-                ////si bien las etiquetas dicen ALIADO, es contrincante, lo que pasa es que las etiquetas al enviarlas dicen que mando mis datos entonces no confundirse cuando se recibe... cuando te retornan datos es que son del contrincante, dle enemigo
-                x = data.deposito_bombasAliadoX;
-                deposito_bombasEnemigo.x = (1000 - x);
-                y = data.deposito_bombasAliadoY;
-                deposito_bombasEnemigo.y = (600 - y);
-                
-                x = data.torreControlAliadaX;
-                torreControlEnemiga.x = (1000 - x);
-                y = data.torreControlAliadaY;
-                torreControlEnemiga.y = (600 - y);
-
-                x = data.deposito_combustibleAliadoX;
-                deposito_combustibleEnemigo.x = (1000 - x);
-                y = data.deposito_combustibleAliadoY;
-                deposito_combustibleEnemigo.y = (600 - y);
-             
-                x = data.pistaAvionesAliadaX;
-                pistaAvionesEnemiga.x = (1000 - x);
-                y = data.pistaAvionesAliadaY;
-                pistaAvionesEnemiga.y = (600 - y);
-
-                avionEnemiga_Activa.x = pistaAvionesEnemiga.x;
-                avionEnemiga_Activa.y = pistaAvionesEnemiga.y;
-
-
-                artilleroE_1.x = ( 1000 - data.datosArtilleros1x );
-                artilleroE_1.y = ( 600 - data.datosArtilleros1y );
-                artilleroE_2.x = ( 1000 - data.datosArtilleros2x );
-                artilleroE_2.y = ( 600 - data.datosArtilleros2y );
-                artilleroE_3.x = ( 1000 - data.datosArtilleros3x );
-                artilleroE_3.y = ( 600 - data.datosArtilleros3y );
-                artilleroE_4.x = ( 1000 - data.datosArtilleros4x );
-                artilleroE_4.y = ( 600 - data.datosArtilleros4y );
-                artilleroE_5.x = ( 1000 - data.datosArtilleros5x );
-                artilleroE_5.y = ( 600 - data.datosArtilleros5y );
-                artilleroE_6.x = ( 1000 - data.datosArtilleros6x );
-                artilleroE_6.y = ( 600 - data.datosArtilleros6y );
-                 
-                break;
-            case "datosArtillerosByTimer":
-                artilleroE_1.x = ( 1000 - data.datosArtilleros1x );
-                artilleroE_1.y = ( 600 - data.datosArtilleros1y );
-                artilleroE_2.x = ( 1000 - data.datosArtilleros2x );
-                artilleroE_2.y = ( 600 - data.datosArtilleros2y );
-                artilleroE_3.x = ( 1000 - data.datosArtilleros3x );
-                artilleroE_3.y = ( 600 - data.datosArtilleros3y );
-                artilleroE_4.x = ( 1000 - data.datosArtilleros4x );
-                artilleroE_4.y = ( 600 - data.datosArtilleros4y );
-                artilleroE_5.x = ( 1000 - data.datosArtilleros5x );
-                artilleroE_5.y = ( 600 - data.datosArtilleros5y );
-                artilleroE_6.x = ( 1000 - data.datosArtilleros6x );
-                artilleroE_6.y = ( 600 - data.datosArtilleros6y );
-                break;
     
-            case "datosArtilleroByOverlap":     
-                x = ( 1000 - data.datosArtilleroX );
-                y = ( 600 - data.datosArtilleroY );  
-                switch (data.datosArtilleroNum) {
-                    case 1:
-                        artilleroE_1.x = x;
-                        artilleroE_1.y = y;
-                        break;
-                    case 2:
-                        artilleroE_2.x = x;
-                        artilleroE_2.y = y;
-                        break;
-                    case 3:
-                        artilleroE_3.x = x;
-                        artilleroE_3.y = y;
-                        break;
-                    case 4:
-                        artilleroE_4.x = x;
-                        artilleroE_4.y = y;
-                        break;
-                    case 5:
-                        artilleroE_5.x = x;
-                        artilleroE_5.y = y;
-                        break;
-                    case 6:
-                        artilleroE_6.x = x;
-                        artilleroE_6.y = y;
-                        break;
-                }
+        } else {
+
+            datosASync = data.datos;
+            //console.log("etiqueta que me llega:: datosASync: "+datosASync);
+
+            switch (datosASync) {
+                case "datosBaseYArtillerosPriVez":
+                    ////si bien las etiquetas dicen ALIADO, es contrincante, lo que pasa es que las etiquetas al enviarlas dicen que mando mis datos entonces no confundirse cuando se recibe... cuando te retornan datos es que son del contrincante, dle enemigo
+                    x = data.deposito_bombasAliadoX;
+                    deposito_bombasEnemigo.x = (1000 - x);
+                    y = data.deposito_bombasAliadoY;
+                    deposito_bombasEnemigo.y = (600 - y);
+                    
+                    x = data.torreControlAliadaX;
+                    torreControlEnemiga.x = (1000 - x);
+                    y = data.torreControlAliadaY;
+                    torreControlEnemiga.y = (600 - y);
+
+                    x = data.deposito_combustibleAliadoX;
+                    deposito_combustibleEnemigo.x = (1000 - x);
+                    y = data.deposito_combustibleAliadoY;
+                    deposito_combustibleEnemigo.y = (600 - y);
                 
-                break;
-            
-            case "datosAvionMovimiento":
-                var cursor = data.cursor;
-                avionEnemiga_Activa.unidadDeVelocidad = 1;
-                var vX, vY;
-                var diagonal=false;
-                if(cursor.right.isDown) {
-                    avionEnemiga_Activa.x = avionEnemiga_Activa.x + avionEnemiga_Activa.unidadDeVelocidad;//++;
+                    x = data.pistaAvionesAliadaX;
+                    pistaAvionesEnemiga.x = (1000 - x);
+                    y = data.pistaAvionesAliadaY;
+                    pistaAvionesEnemiga.y = (600 - y);
+
+                    avionEnemiga_Activa.x = pistaAvionesEnemiga.x;
+                    avionEnemiga_Activa.y = pistaAvionesEnemiga.y;
+
+
+                    artilleroE_1.x = ( 1000 - data.datosArtilleros1x );
+                    artilleroE_1.y = ( 600 - data.datosArtilleros1y );
+                    artilleroE_2.x = ( 1000 - data.datosArtilleros2x );
+                    artilleroE_2.y = ( 600 - data.datosArtilleros2y );
+                    artilleroE_3.x = ( 1000 - data.datosArtilleros3x );
+                    artilleroE_3.y = ( 600 - data.datosArtilleros3y );
+                    artilleroE_4.x = ( 1000 - data.datosArtilleros4x );
+                    artilleroE_4.y = ( 600 - data.datosArtilleros4y );
+                    artilleroE_5.x = ( 1000 - data.datosArtilleros5x );
+                    artilleroE_5.y = ( 600 - data.datosArtilleros5y );
+                    artilleroE_6.x = ( 1000 - data.datosArtilleros6x );
+                    artilleroE_6.y = ( 600 - data.datosArtilleros6y );
+                    
+                    break;
+                case "datosArtillerosByTimer":
+                    artilleroE_1.x = ( 1000 - data.datosArtilleros1x );
+                    artilleroE_1.y = ( 600 - data.datosArtilleros1y );
+                    artilleroE_2.x = ( 1000 - data.datosArtilleros2x );
+                    artilleroE_2.y = ( 600 - data.datosArtilleros2y );
+                    artilleroE_3.x = ( 1000 - data.datosArtilleros3x );
+                    artilleroE_3.y = ( 600 - data.datosArtilleros3y );
+                    artilleroE_4.x = ( 1000 - data.datosArtilleros4x );
+                    artilleroE_4.y = ( 600 - data.datosArtilleros4y );
+                    artilleroE_5.x = ( 1000 - data.datosArtilleros5x );
+                    artilleroE_5.y = ( 600 - data.datosArtilleros5y );
+                    artilleroE_6.x = ( 1000 - data.datosArtilleros6x );
+                    artilleroE_6.y = ( 600 - data.datosArtilleros6y );
+                    break;
+        
+                case "datosArtilleroByOverlap":     
+                    x = ( 1000 - data.datosArtilleroX );
+                    y = ( 600 - data.datosArtilleroY );  
+                    switch (data.datosArtilleroNum) {
+                        case 1:
+                            artilleroE_1.x = x;
+                            artilleroE_1.y = y;
+                            break;
+                        case 2:
+                            artilleroE_2.x = x;
+                            artilleroE_2.y = y;
+                            break;
+                        case 3:
+                            artilleroE_3.x = x;
+                            artilleroE_3.y = y;
+                            break;
+                        case 4:
+                            artilleroE_4.x = x;
+                            artilleroE_4.y = y;
+                            break;
+                        case 5:
+                            artilleroE_5.x = x;
+                            artilleroE_5.y = y;
+                            break;
+                        case 6:
+                            artilleroE_6.x = x;
+                            artilleroE_6.y = y;
+                            break;
+                    }
+                    
+                    break;
+                
+                case "datosAvionMovimiento":
+                    /* var d = new Date();    
+                    var timeOrigen = data.timeOrigen;
+                    console.log("diferencia entre orgine y llegada:: "+  (d.getTime() - timeOrigen) );*/
+
+                    x = data.avionActivaX;
+                    y = data.avionActivaY;
+                    
+                    //console.log("x::" + x +"   -   y::"+y);
+
+                    in_avionEnemigaActivaX = (1000 - x);
+                    in_avionEnemigaActivaY = (600 - y);
+
+                    x = data.avionActivaVx;
+                    y = data.avionActivaVY;
+
+                    in_avionEnemiga_ActivaVx = (x*-1);
+                    in_avionEnemiga_ActivaVy = (y*-1);
+                    
                     avionEnemiga_Activa.resetFlip();
-                    if (cursor.down.isDown){
-                        // avionEnemiga_Activa.x = avionEnemiga_Activa.x + unidadDeVelocidad;//++; 
-                        avionEnemiga_Activa.y = avionEnemiga_Activa.y + avionEnemiga_Activa.unidadDeVelocidad;//++;
-                        avionEnemiga_Activa.angle=45;
-                        vX = 10;vY = 10;
-                    }else{
-                        if (cursor.up.isDown){
-                            // avionEnemiga_Activa.x = avionEnemiga_Activa.x + unidadDeVelocidad;//++; 
-                            avionEnemiga_Activa.y = avionEnemiga_Activa.y - avionEnemiga_Activa.unidadDeVelocidad;//--;
-                            avionEnemiga_Activa.angle=-45;
-                            vX = 10;vY = -10;
-                        }else{avionEnemiga_Activa.angle=0;diagonal=true;vX = 10;vY = 0;}
-                    ;}                
-                } else if(cursor.left.isDown) {
-                    avionEnemiga_Activa.x = avionEnemiga_Activa.x - avionEnemiga_Activa.unidadDeVelocidad;//--;
-                    avionEnemiga_Activa.resetFlip();
-                    avionEnemiga_Activa.flipX=true;
-                    if (cursor.down.isDown){
-                        // avionEnemiga_Activa.x = avionEnemiga_Activa.x - unidadDeVelocidad;//--; 
-                        avionEnemiga_Activa.y = avionEnemiga_Activa.y + avionEnemiga_Activa.unidadDeVelocidad;//++;
-                        avionEnemiga_Activa.angle=-45;
-                        vX = -10;vY = 10;
-                    }else{
-                        if (cursor.up.isDown){
-                            // avionEnemiga_Activa.x = avionEnemiga_Activa.x - unidadDeVelocidad;//--; 
-                            avionEnemiga_Activa.y = avionEnemiga_Activa.y - avionEnemiga_Activa.unidadDeVelocidad;//--;
-                            avionEnemiga_Activa.angle=45;
-                            vX = -10;vY = -10;
-                        }else{avionEnemiga_Activa.angle=0;diagonal=true; vX = -10;vY = 0;}
-                    ;}           
-                } else if(cursor.up.isDown) {
-                    avionEnemiga_Activa.y = avionEnemiga_Activa.y - avionEnemiga_Activa.unidadDeVelocidad;//--;
-                    avionEnemiga_Activa.resetFlip();
-                    avionEnemiga_Activa.angle=-90;
-                    vX = 0;
-                    vY = -10;
-                } else if(cursor.down.isDown) {
-                    avionEnemiga_Activa.y = avionEnemiga_Activa.y + avionEnemiga_Activa.unidadDeVelocidad;//++;
-                    avionEnemiga_Activa.resetFlip();
-                    avionEnemiga_Activa.angle=90;
-                    vX = 0;
-                    vY = 10;
-                }
+
+                    x = data.avionActivaAngulo;
+                    y = (x*-1);
+                    avionEnemiga_Activa.angle = y;  
+                    
+                    if (y==0) {
+                        x = data.avionActivaFlipX;        
+                        avionEnemiga_Activa.flipX = !x; 
+                    }
+
+                    avionEnemiga_Activa.x = in_avionEnemigaActivaX;
+                    avionEnemiga_Activa.y = in_avionEnemigaActivaY;
+                    avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
+                    avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
+                    setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy); 
+
+                    
+                    break;
+                case "datosAvionAltura":
+                    x = data.avionActivaVx;
+                    y = data.avionActivaVY;
+
+                    in_avionEnemiga_ActivaVx = (x*-1);
+                    in_avionEnemiga_ActivaVy = (y*-1);
+
+                    avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
+                    avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
+
+                    setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
+
+                    avionEnemiga_Activa.z = data.avionActivaZ;
+                    switch (avionEnemiga_Activa.z) {
+                        case 0:
+                            avionEnemiga_Activa.scaleX=0.1;
+                            avionEnemiga_Activa.scaleY=0.1;
+                            break;
+                        case 100:
+                            avionEnemiga_Activa.scaleX=0.2;
+                            avionEnemiga_Activa.scaleY=0.2;
+                            break; 
+                        case 200:
+                            avionEnemiga_Activa.scaleX=0.3;
+                            avionEnemiga_Activa.scaleY=0.3;
+                            break;
+                    }
+                    break;
+                case "disparoAvion":
+                    var data_tiempoDelUpdate = data.tiempoDelUpdate;
+                    var data_lastFiredAvion = data.lastFiredAvion;
+
+                    avionEnemiga_Activa.lastFiredAvion = data_lastFiredAvion;
+                    evento_avion_disparo(data_tiempoDelUpdate, avionEnemiga_Activa);
+        
+                    break;
+                case "disparoAvionBomba":
+                    var data_tiempoDelUpdate = data.tiempoDelUpdate;
+                    var data_lastFiredBombaAvion = data.lastFiredBombaAvion;
+
+                    avionEnemiga_Activa.lastFiredBombaAvion = data_lastFiredBombaAvion;
+                    evento_avion_disparoBombaE(data_tiempoDelUpdate, avionEnemiga_Activa);
+
+                    break;
+                case "destruiUltimoElementoBaseEnemiga":
+                    var elem_baseAux;
+                    if (deposito_bombasAliado.vida > 0) {
+                        elem_baseAux = deposito_bombasAliado; 
+                    } else {
+                        if (torreControlAliada.vida > 0) {
+                            elem_baseAux = torreControlAliada;
+                        } else { //deposito_combustibleAliado
+                            elem_baseAux = deposito_combustibleAliado;
+                        }
+                    }
+
+                    elem_baseAux.body.enable = false;
+                    Gpo_ElementosBaseAliada.killAndHide(elem_baseAux); 
+                   
+                    condicionPerdidaAliado = true;
+                    
+                    break;
+                case "destruiUltimoAvionEnemiga":
+                    //tengo que destruir esa ultima avion mia
+                    avionAliada_Activa_Activa.body.enable = false;
+                    Gpo_AvionesAliados.killAndHide(avionAliada_Activa_Activa);
+
+                    condicionPerdidaAliado = true;
+
+                    break;
+        
+                case "datosEvento1":
                 
-                avionEnemiga_ActivaVx = vX;
-                avionEnemiga_ActivaVy = vY;
-
-                setVelocidadAvion(avionEnemiga_Activa, vX, vY);
-
-
-    
-
-
-
-
-
-
-   /*              var d = new Date();    
-                var timeOrigen = data.timeOrigen;
-                console.log("diferencia entre orgine y llegada:: "+  (d.getTime() - timeOrigen) );
-
-                x = data.avionActivaX;
-                y = data.avionActivaY;
-
-                in_avionEnemigaActivaX = (1000 - x);
-                in_avionEnemigaActivaY = (600 - y);
-
-                x = data.avionActivaVx;
-                y = data.avionActivaVY;
-
-                in_avionEnemiga_ActivaVx = (x*-1);
-                in_avionEnemiga_ActivaVy = (y*-1);
+                    break;
+                case "datosEvento1":
                 
-                avionEnemiga_Activa.resetFlip();
-
-                x = data.avionActivaAngulo;
-                y = (x*-1);
-                avionEnemiga_Activa.angle = y;  
+                    break;
+                case "datosEvento1":
                 
-                if (y==0) {
-                    x = data.avionActivaFlipX;        
-                    avionEnemiga_Activa.flipX = !x; 
-                }
-
-                avionEnemiga_Activa.x = in_avionEnemigaActivaX;
-                avionEnemiga_Activa.y = in_avionEnemigaActivaY;
-                avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
-                avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
-                setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy); */
-
-                break;
-            case "datosAvionAltura":
-                x = data.avionActivaVx;
-                y = data.avionActivaVY;
-
-                in_avionEnemiga_ActivaVx = (x*-1);
-                in_avionEnemiga_ActivaVy = (y*-1);
-
-                avionEnemiga_ActivaVx = in_avionEnemiga_ActivaVx;
-                avionEnemiga_ActivaVy = in_avionEnemiga_ActivaVy;
-
-                setVelocidadAvion(avionEnemiga_Activa, avionEnemiga_ActivaVx, avionEnemiga_ActivaVy);
-
-                avionEnemiga_Activa.z = data.avionActivaZ;
-                switch (avionEnemiga_Activa.z) {
-                    case 0:
-                        avionEnemiga_Activa.scaleX=0.1;
-                        avionEnemiga_Activa.scaleY=0.1;
-                        break;
-                    case 100:
-                        avionEnemiga_Activa.scaleX=0.2;
-                        avionEnemiga_Activa.scaleY=0.2;
-                        break; 
-                    case 200:
-                        avionEnemiga_Activa.scaleX=0.3;
-                        avionEnemiga_Activa.scaleY=0.3;
-                        break;
-                }
-                break;
-            case "datosEvento1":
+                    break;
+                case "datosEvento1":
                 
-                break;
+                    break;
+
+
+
+
+
+
+
+
+            }
+
         }
-
-
-   
     }
-
-
  }
  
 function sendDatosWebSocket(datosAEnviar){
     var d = new Date(); 
-
     switch (datosAEnviar) {
         case "datosBaseYArtillerosPriVez":
-                rows =
-                { "partidaId": partidaID
-                , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-                , "sessionId": mi_SessId
-                , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-                , "datos": datosAEnviar
-        
-                , "deposito_bombasAliadoX": deposito_bombasAliado.x
-                , "deposito_bombasAliadoY": deposito_bombasAliado.y
-                , "torreControlAliadaX": torreControlAliada.x
-                , "torreControlAliadaY": torreControlAliada.y
-                , "deposito_combustibleAliadoX": deposito_combustibleAliado.x
-                , "deposito_combustibleAliadoY": deposito_combustibleAliado.y
-                , "pistaAvionesAliadaX": pistaAvionesAliada.x
-                , "pistaAvionesAliadaY": pistaAvionesAliada.y
-                /////del otro lado, ademas de acomodar la pista, tiene que acomodar la primer avion activa quieta
-                        
-                , "datosArtilleros1x": artilleroA_1.x
-                , "datosArtilleros1y": artilleroA_1.y
-                , "datosArtilleros2x": artilleroA_2.x
-                , "datosArtilleros2y": artilleroA_2.y
-                , "datosArtilleros3x": artilleroA_3.x
-                , "datosArtilleros3y": artilleroA_3.y
-                , "datosArtilleros4x": artilleroA_4.x
-                , "datosArtilleros4y": artilleroA_4.y
-                , "datosArtilleros5x": artilleroA_5.x
-                , "datosArtilleros5y": artilleroA_5.y
-                , "datosArtilleros6x": artilleroA_6.x
-                , "datosArtilleros6y": artilleroA_6.y
-        
-                };
-            break;
-        case "datosArtillerosByTimer":
             rows =
             { "partidaId": partidaID
             , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
             , "sessionId": mi_SessId
             , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
             , "datos": datosAEnviar
-
+            , "deposito_bombasAliadoX": deposito_bombasAliado.x
+            , "deposito_bombasAliadoY": deposito_bombasAliado.y
+            , "torreControlAliadaX": torreControlAliada.x
+            , "torreControlAliadaY": torreControlAliada.y
+            , "deposito_combustibleAliadoX": deposito_combustibleAliado.x
+            , "deposito_combustibleAliadoY": deposito_combustibleAliado.y
+            , "pistaAvionesAliadaX": pistaAvionesAliada.x
+            , "pistaAvionesAliadaY": pistaAvionesAliada.y
+            /////del otro lado, ademas de acomodar la pista, tiene que acomodar la primer avion activa quieta      
             , "datosArtilleros1x": artilleroA_1.x
             , "datosArtilleros1y": artilleroA_1.y
             , "datosArtilleros2x": artilleroA_2.x
@@ -596,45 +568,58 @@ function sendDatosWebSocket(datosAEnviar){
             , "datosArtilleros5y": artilleroA_5.y
             , "datosArtilleros6x": artilleroA_6.x
             , "datosArtilleros6y": artilleroA_6.y
-    
             };
             break;
-
-            case "datosArtilleroByOverlap":            
-            
-                rows =
-                { "partidaId": partidaID
-                , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
-                , "sessionId": mi_SessId
-                , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
-                , "datos": datosAEnviar
-    
-                , "datosArtilleroNum": artilleroAuxNum
-                , "datosArtilleroX": artilleroAuxX
-                , "datosArtilleroY": artilleroAuxY
-        
-                };
-                break;
-            
-
-
+        case "datosArtillerosByTimer":
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar
+            , "datosArtilleros1x": artilleroA_1.x
+            , "datosArtilleros1y": artilleroA_1.y
+            , "datosArtilleros2x": artilleroA_2.x
+            , "datosArtilleros2y": artilleroA_2.y
+            , "datosArtilleros3x": artilleroA_3.x
+            , "datosArtilleros3y": artilleroA_3.y
+            , "datosArtilleros4x": artilleroA_4.x
+            , "datosArtilleros4y": artilleroA_4.y
+            , "datosArtilleros5x": artilleroA_5.x
+            , "datosArtilleros5y": artilleroA_5.y
+            , "datosArtilleros6x": artilleroA_6.x
+            , "datosArtilleros6y": artilleroA_6.y
+            };
+            break;
+        case "datosArtilleroByOverlap":            
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar
+            , "datosArtilleroNum": artilleroAuxNum
+            , "datosArtilleroX": artilleroAuxX
+            , "datosArtilleroY": artilleroAuxY
+            };
+            break;
         case "datosAvionMovimiento":
-              
-
             rows =
             { "partidaId": partidaID
             , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
             //, "sessionId": mi_SessId
             , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
             , "datos": datosAEnviar         
-            , "teclaPess": teclaPess  
-            , "cursor": cursors
-  /*           , "avionActivaX": avionAliada_Activa.x
+            , "avionActivaX": avionAliada_Activa.x
             , "avionActivaY": avionAliada_Activa.y
             , "avionActivaVx": avionAliada_ActivaVx
             , "avionActivaVY": avionAliada_ActivaVy
             , "avionActivaAngulo": avionAliada_Activa.angle
-            , "avionActivaFlipX": avionAliada_Activa.flipX */
+            , "avionActivaFlipX": avionAliada_Activa.flipX 
+            
+            //, "avionActivaVida": avionAliada_Activa.vida 
+            //, "avionActivaCombustible": avionAliada_Activa.combustible
+            //FALTA MANDAR LA VIDA;
         
             };
             break;
@@ -645,21 +630,69 @@ function sendDatosWebSocket(datosAEnviar){
             , "sessionId": mi_SessId
             , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
             , "datos": datosAEnviar
-
             , "avionActivaZ": avionAliada_Activa.z
             , "avionActivaY": avionAliada_Activa.y
             , "avionActivaVx": avionAliada_ActivaVx
             , "avionActivaVY": avionAliada_ActivaVy        
             };
             break;
+        case "disparoAvion":
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar     
+            , "tiempoDelUpdate": tiempoDelUpdate 
+            , "lastFiredAvion": avionAliada_Activa.lastFiredAvion 
+            };
+            break;
+        case "disparoAvionBomba":
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar
+            , "tiempoDelUpdate": tiempoDelUpdate 
+            , "lastFiredBombaAvion": avionAliada_Activa.lastFiredBombaAvion 
+            };
+            break;
+        case "destruiUltimoElementoBaseEnemiga":
+            ////le envio que yo destrui el ultimo elemento su base
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar
+            };
+            break;
+        case "destruiUltimoAvionEnemiga":
+            rows =
+            { "partidaId": partidaID
+            , "isIngresoPorPrimeraVez": isIngresoPorPrimeraVez
+            , "sessionId": mi_SessId
+            , "enviaDatoDesdeElJugadorNum": jugadorMiNumero
+            , "datos": datosAEnviar
+            };
+            break;
+
         case "datosEvento1":
-            
+        
+            break;
+        case "datosEvento1":
+        
+            break;
+        case "datosEvento1":
+        
+            break;
+        case "datosEvento1":
+        
             break;
     }
     
     dataJson = JSON.stringify(rows);
-
-    
     //console.log("envio de datos dataJson::" + dataJson);
     if (isWSOpen) {
         webSocket.send(dataJson);
@@ -1257,7 +1290,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         /// APLICO SOMBRA A AQUELLO QUE QUIERA ENMASCARAR: ARTILLEROS, ELEMENTOS DE BASE+AVIONES
 
-/*         avionEnemiga_Activa.mask = spotlight_instance;
+        avionEnemiga_Activa.mask = spotlight_instance;
         this.pisoEnemigo.mask = spotlight_instance;
         artilleroE_1.mask = spotlight_instance;
         artilleroE_2.mask = spotlight_instance;
@@ -1269,7 +1302,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         pistaAvionesEnemiga.mask = spotlight_instance;
         deposito_bombasEnemigo.mask = spotlight_instance;
         deposito_combustibleEnemigo.mask = spotlight_instance;
- */
+ 
 
         ///aplico a los elementos enemigos
 
@@ -1299,12 +1332,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.flecha_left   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
         this.flecha_up     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
         this.flecha_down   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
-        this.superCenter   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
-        this.superKill     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.K);
-        this.superBorn     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.J);
+        this.superBorn     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Y);
+        this.superCenter   =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.U);
+        this.superKill     =  this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I);
         
-		this.teclaPausa = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
-        this.teclaReanudar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+		this.teclaPausaMenu = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+        this.teclaSwitchVista = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.L);
         /// LAS BOMBAS SE DIBUJAN AQUI POR ORDEN DE CREACION DE IMAGENES
         /// BOMBA ALIADA Y ENEMIGA
         bombaBulletA = this.physics.add.image(3000,0,"bala");
@@ -1367,9 +1400,9 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
         ///// CREACION DE TABLERO AVION
-        tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '16px Courier Bold', fill: '#00ff00' });
+        tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '20px Courier Bold', fill: '#00ff00' });
         ///// CREACION DE TABLERO BASE
-        tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '16px Courier Bold', fill: '#ffffff' });
+        tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '20px Courier Bold', fill: '#ffffff' });
         
         tableroAvion.setDepth(9);
         tableroBase.setDepth(4)
@@ -1406,12 +1439,10 @@ export default class s7_campoBatalla extends Phaser.Scene {
     /////////////////-----------------------------------------------------------------------------------
     update(time, delta) {
 
-        
         tiempoDelUpdate = time;
 
         isContinuarUpdate = validarCondicionesPartidaAliada();
         if (isContinuarUpdate) {
-
 
 
             ///// MOVIMIENTO DE AVION EN BASE A BOTONES
@@ -1420,7 +1451,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             modificoDireccion = false;
             getUnidadDesplazamiento(avionAliada_Activa);
 
-            if(this.right.isDown || this.left.isDown || this.up.isDown || this.down.isDown){
+            /* if(this.right.isDown || this.left.isDown || this.up.isDown || this.down.isDown){
                 avionAliada_Activa.enPista = false;
 
                 var vX, vY;
@@ -1480,9 +1511,17 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 avionAliada_ActivaVy = vY;
 
                 setVelocidadAvion(avionAliada_Activa, vX, vY);
-                modificoDireccion = true;
+                modificoDireccion = true; 
+
+
+
+
+
+
+
+
                 
-                cursors = this.input.keyboard.createCursorKeys();
+                //cursors = this.input.keyboard.createCursorKeys();
                 //var duration = this.cursors.getDuration();
                 //console.log(this.duration);
                 
@@ -1495,7 +1534,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 
 
 
-            }
+            }*/
              ////FIN IF DE BOTONES DE DIRECCION
             
 
@@ -1524,7 +1563,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }
             
             /////---------FISICAS DE AVIONES y BALAS ENEMIGAS------
-////////////setMaksAvion(avionEnemiga_Activa);
+            setMaksAvion(avionEnemiga_Activa);
 
             //// ACTUALIZAR TEXTO DE TABLERO BASE:
             tableroBase.setText([
@@ -1550,13 +1589,14 @@ export default class s7_campoBatalla extends Phaser.Scene {
             */
 
             /////DISPARO AVION   ////se intento pasar a un evento pero empeora la jugabilidad
-            if ((this.disparoAvion.isDown) && (tiempoDelUpdate > avionAliada_Activa.lastFiredAvion)){
+            /* if ((this.disparoAvion.isDown) && (tiempoDelUpdate > avionAliada_Activa.lastFiredAvion)){
                 evento_avion_disparo(tiempoDelUpdate, avionAliada_Activa);
-            }
+                sendDatosWebSocket("disparoAvion");
+            } */
             //console.log(avionAliada_Activa.lastFiredBombaAvion);
-            if ((this.disparoAvionBomba.isDown) && (tiempoDelUpdate > avionAliada_Activa.lastFiredBombaAvion)){
+            /* if ((this.disparoAvionBomba.isDown) && (tiempoDelUpdate > avionAliada_Activa.lastFiredBombaAvion)){
                 evento_avion_disparoBomba(tiempoDelUpdate, avionAliada_Activa);
-            } 
+            }  */
 
             //////DETECTAR SI AVIONES ENEMIGAS PASAN SOBRE ALGUN ARTILLERO
             hayEnemigoEnRangoArtillero(time);
@@ -1568,10 +1608,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
         }else{
+            
+
+
             if (mostrarAlert) {
                 if (condicionPerdidaAliado) {
                     tableroAvion.visible = false;
-                    tableroAvion = this.add.text(400, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#ff0000' });
+                    tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#ff0000' });
                     tableroAvion.setText([
                         '¡¡¡PERDISTE!!',
                     ]);
@@ -1587,7 +1630,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     ]);
                 } else { //perdio el otro
                     tableroAvion.visible = false;
-                    tableroAvion = this.add.text(400, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#FFFFFF' });
+                    tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#FFFFFF' });
                     tableroAvion.setText([
                         '¡¡¡GANASTE!!',
                     ]);
@@ -1619,49 +1662,94 @@ export default class s7_campoBatalla extends Phaser.Scene {
     window.addEventListener('keydown', escuchaDeKeyDownSwitch); 
 
     function escuchaDeKeyDownSwitch(event){
+        
         switch(event.keyCode) {
             case Phaser.Input.Keyboard.KeyCodes.D:
-                evento_tecla_avionDireccion_D();
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDireccion_D();
+                }
             break;
             case Phaser.Input.Keyboard.KeyCodes.A:
-                evento_tecla_avionDireccion_A();
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDireccion_A();
+                }
             break;
             case Phaser.Input.Keyboard.KeyCodes.W:
-                evento_tecla_avionDireccion_W();
-                break;
-            case Phaser.Input.Keyboard.KeyCodes.S:
-                evento_tecla_avionDireccion_S();
-                break;
-            case Phaser.Input.Keyboard.KeyCodes.ONE:
-                evento_tecla_avionAltura0();
-            break;
-            case Phaser.Input.Keyboard.KeyCodes.TWO:
-                evento_tecla_avionAltura1();
-            break;
-            case Phaser.Input.Keyboard.KeyCodes.THREE:
-                evento_tecla_avionAltura2();
-                break;
-            case Phaser.Input.Keyboard.KeyCodes.SPACE:
-                evento_tecla_avionDisparar();
-                break;
-            case Phaser.Input.Keyboard.KeyCodes.B:
-                evento_tecla_avionDispararBomba();
-                break; 
-            case Phaser.Input.Keyboard.KeyCodes.N:
-                evento_tecla_autodestruccion();
-                break;
-            case Phaser.Input.Keyboard.KeyCodes.P:
-                if (isInPause == false) {
-                    isInPause = true;
-                    pausarJuego();
-                } else {
-                    isInPause = false;
-                    reanudarJuego();
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDireccion_W();
                 }
                 break;
-            case Phaser.Input.Keyboard.KeyCodes.R:
-                reanudarJuego();
+            case Phaser.Input.Keyboard.KeyCodes.S:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDireccion_S();
+                }
                 break;
+            case Phaser.Input.Keyboard.KeyCodes.ONE:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionAltura0();
+                }
+            break;
+            case Phaser.Input.Keyboard.KeyCodes.TWO:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionAltura1();
+                }
+            break;
+            case Phaser.Input.Keyboard.KeyCodes.THREE:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionAltura2();
+                }
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.SPACE:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDisparar();
+                }
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.B:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_avionDispararBomba();
+                }
+                break; 
+            case Phaser.Input.Keyboard.KeyCodes.N:
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+                    evento_tecla_autodestruccion();
+                }
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.L:
+               // isContinuarUpdate = validarCondicionesPartidaAliada();
+               // if (isContinuarUpdate) {
+                    if (isInVistaLateral == false) {
+                        isInVistaLateral = true;
+                        switchVistaJuegoToVistaLateral();
+                    } else {
+                        isInVistaLateral = false;
+                        switchVistaLateralAJuego();
+                    }
+               // }
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.P:
+                ////Paausar juego y mostrar tablero de opcion para rendirse y salir; o guardar    
+
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.Y:
+                //// activar super
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.U:
+                //// centrar super
+                break;
+            case Phaser.Input.Keyboard.KeyCodes.I:
+                //// cerrar super
+                break;
+
         }
     }
     function evento_tecla_avionDireccion_D(){
@@ -1669,8 +1757,20 @@ export default class s7_campoBatalla extends Phaser.Scene {
             isEnvioMisDatosBase = false;
             sendDatosWebSocket("datosBaseYArtillerosPriVez");
         }else{
-            teclaPess = "D";
-            cursors = sceneJuego.input.keyboard.createCursorKeys();
+            avionAliada_Activa.enPista = false;
+            var vX, vY;
+            var diagonal=false;
+            ultimaTeclaPresionada = "right";
+            avionAliada_Activa.x = avionAliada_Activa.x + avionAliada_Activa.unidadDeVelocidad;//++;
+            avionAliada_Activa.resetFlip();
+            avionAliada_Activa.angle=0;
+            diagonal=true;
+            vX = 10;
+            vY = 0;
+            avionAliada_ActivaVx = vX;
+            avionAliada_ActivaVy = vY;
+            setVelocidadAvion(avionAliada_Activa, vX, vY);
+            modificoDireccion = true;
             sendDatosWebSocket("datosAvionMovimiento");
         }       
 
@@ -1681,8 +1781,18 @@ export default class s7_campoBatalla extends Phaser.Scene {
             isEnvioMisDatosBase = false;
             sendDatosWebSocket("datosBaseYArtillerosPriVez");
         } else{
-            teclaPess = "A";
-            cursors = sceneJuego.input.keyboard.createCursorKeys();
+            avionAliada_Activa.enPista = false;
+            var vX, vY;
+            var diagonal=false;
+            ultimaTeclaPresionada = "left";
+            avionAliada_Activa.x = avionAliada_Activa.x - avionAliada_Activa.unidadDeVelocidad;//--;
+            avionAliada_Activa.resetFlip();
+            avionAliada_Activa.flipX=true;
+            avionAliada_Activa.angle=0;diagonal=true; vX = -10;vY = 0;
+            avionAliada_ActivaVx = vX;
+            avionAliada_ActivaVy = vY;
+            setVelocidadAvion(avionAliada_Activa, vX, vY);
+            modificoDireccion = true;
             sendDatosWebSocket("datosAvionMovimiento");
         }  
         
@@ -1692,8 +1802,19 @@ export default class s7_campoBatalla extends Phaser.Scene {
             isEnvioMisDatosBase = false;
             sendDatosWebSocket("datosBaseYArtillerosPriVez");
         } else{
-            teclaPess = "W";
-            cursors = sceneJuego.input.keyboard.createCursorKeys();
+            avionAliada_Activa.enPista = false;
+            var vX, vY;
+            var diagonal=false;
+            ultimaTeclaPresionada = "up";
+            avionAliada_Activa.y = avionAliada_Activa.y - avionAliada_Activa.unidadDeVelocidad;//--;
+            avionAliada_Activa.resetFlip();
+            avionAliada_Activa.angle=-90;
+            vX = 0;
+            vY = -10;
+            avionAliada_ActivaVx = vX;
+            avionAliada_ActivaVy = vY;
+            setVelocidadAvion(avionAliada_Activa, vX, vY);
+            modificoDireccion = true;
             sendDatosWebSocket("datosAvionMovimiento");
         }  
 
@@ -1703,8 +1824,19 @@ export default class s7_campoBatalla extends Phaser.Scene {
             isEnvioMisDatosBase = false;
             sendDatosWebSocket("datosBaseYArtillerosPriVez");
         } else{
-            teclaPess = "S";
-            cursors = sceneJuego.input.keyboard.createCursorKeys();
+            avionAliada_Activa.enPista = false;
+            var vX, vY;
+            var diagonal=false;
+            ultimaTeclaPresionada = "down";
+            avionAliada_Activa.y = avionAliada_Activa.y + avionAliada_Activa.unidadDeVelocidad;//++;
+            avionAliada_Activa.resetFlip();
+            avionAliada_Activa.angle=90;
+            vX = 0;
+            vY = 10;
+            avionAliada_ActivaVx = vX;
+            avionAliada_ActivaVy = vY;
+            setVelocidadAvion(avionAliada_Activa, vX, vY);
+            modificoDireccion = true;
             sendDatosWebSocket("datosAvionMovimiento");
         }  
 
@@ -1762,14 +1894,17 @@ export default class s7_campoBatalla extends Phaser.Scene {
     }
 
     function evento_tecla_avionDisparar(){
-    /*      if (tiempoDelUpdate > avionAliada_Activa.lastFiredAvion) {
+        if ( tiempoDelUpdate > avionAliada_Activa.lastFiredAvion) {
             evento_avion_disparo(tiempoDelUpdate, avionAliada_Activa);
-        } */ 
+            sendDatosWebSocket("disparoAvion");
+        } 
+        
     }
     function evento_tecla_avionDispararBomba(){
-    /*      if (tiempoDelUpdate > avionAliada_Activa.lastFiredBombaAvion) {
+        if (tiempoDelUpdate > avionAliada_Activa.lastFiredBombaAvion) {
             evento_avion_disparoBomba(tiempoDelUpdate, avionAliada_Activa);
-        } */ 
+            sendDatosWebSocket("disparoAvionBomba");
+        }
     }
 
     function evento_tecla_autodestruccion(){
@@ -1836,6 +1971,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
 /////////////////-------------------------INICIO funciones y eventos de elementos base-----------------------------------
 /////////////////---------------------------------------------------------------------------------------
     function hayEnemigoEnRangoTorreDeControl(time){
+        if (jugadorMiNumero == 1) {
+            colorBando = 'torreControl_VLateral_negra';
+        } else {
+            colorBando = 'torreControl_VLateral_roja';
+        }
+        torreControlAliadaLateral.setTexture(colorBando);
+
         torreControlAliada.HayEnemigo = false;
         if (jugadorMiNumero == 1) {
             colorBando = 'torreControl_negro';
@@ -1855,6 +1997,14 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     if (distanciaEntreDosObjetos <= rangoMaximoVision) {
                         //cambio att de torre
                         torreControlAliada.hayEnemigo = true;  
+
+                        if (jugadorMiNumero == 1) {
+                            colorBando = 'torreControl_VLateral_negra_activa';
+                        } else {
+                            colorBando = 'torreControl_VLateral_roja_activa';
+                        }
+                        torreControlAliadaLateral.setTexture(colorBando);
+
                         if (jugadorMiNumero == 1) {
                             colorBando = 'torreControl_negro_activo';
                         } else {
@@ -2172,7 +2322,21 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     colorBando = 'artillero_rojo';
                 }
                 arrayArtillerosAliados[i].setTexture(colorBando);
-                //para cada avion enemiga
+
+                if (avionEnemiga_Activa.vida > 0) {
+                    distanciaEntreDosObjetos = distanceRound(arrayArtillerosAliados[i], avionEnemiga_Activa); 
+                    rangoMaximoVision = arrayArtillerosAliados[i].rangoVision;
+                    if (distanciaEntreDosObjetos > rangoMaximoVision) {
+                        moverArtillero(arrayArtillerosAliados[i]);
+                    } else {
+                        if (avionEnemiga_Activa.z == 200) {
+                            moverArtillero(arrayArtillerosAliados[i]);
+                        } 
+                    }
+                    
+                }
+
+                /* //para cada avion enemiga
                 for (j = 0; j < arrayAvionesEnemigas.length; j++){
                     if(arrayAvionesEnemigas[j].vida > 0){
                         if (arrayAvionesEnemigas[j].z < 200){
@@ -2184,7 +2348,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                             }
                         } 
                     }
-                }
+                } */
             }
 
         }  
@@ -2353,6 +2517,15 @@ export default class s7_campoBatalla extends Phaser.Scene {
         in_AvionActivaAUX.body.enable=true;
         in_AvionActivaAUX.isLaAvionActiva = true;
         in_AvionActivaAUX.enPista = true;
+
+        if (in_AvionActivaAUX.bando == "Aliado") {
+            in_AvionActivaAUX.x = pistaAvionesAliada.x;
+            in_AvionActivaAUX.y = pistaAvionesAliada.y; 
+        } else {
+            in_AvionActivaAUX.x = pistaAvionesEnemiga.x;
+            in_AvionActivaAUX.y = pistaAvionesEnemiga.y; 
+        }
+
         return in_AvionActivaAUX;
     }
 
@@ -2377,6 +2550,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }
         } else {
             if (Gpo_AvionesEnemigos.getTotalUsed() == 0) {
+                sendDatosWebSocket("destruiUltimoAvionEnemiga");
                 condicionPerdidaEnemigo = true;
             } else {
                 avionEnemiga_Activa = getProximoAvionActivo(Gpo_AvionesEnemigos);
@@ -2386,7 +2560,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
     }
 
     function getUnidadDesplazamiento(avion){
-        avion.unidadDeVelocidad = 1;
+        avion.unidadDeVelocidad = 10;
         if (avion.tieneBomba) {
             avion.unidadDeVelocidad = avion.unidadDeVelocidad - avion.unidadDeVelocidad*0.50;
         }
@@ -2394,8 +2568,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
             avion.unidadDeVelocidad = avion.unidadDeVelocidad - avion.unidadDeVelocidad*0.50;
         }
         if ( (avion.tieneBomba) && (avion.z > 100) ) {
-            avion.unidadDeVelocidad = avion.unidadDeVelocidad*0.10;
+            avion.unidadDeVelocidad = avion.unidadDeVelocidad*0.20;
         }
+
+        if (avion.z == 100) {
+            avion.unidadDeVelocidad = avion.unidadDeVelocidad - avion.unidadDeVelocidad*0.50;
+        } 
     }
 
     function setVelocidadAvion(avion, velX, velY){
@@ -2449,7 +2627,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
     function evento_avion_disparo(time, in_AvionOrigen){
         juego_var_destinoCreacionBalas = 2;
-        var bullet = in_AvionOrigen.bullets_avion_Aliado.get();
+        var bullet;
+        if (in_AvionOrigen.bando == "Aliado") {
+            bullet = in_AvionOrigen.bullets_avion_Aliado.get();
+        }else{
+            bullet = in_AvionOrigen.bullets_avion_Enemigo.get(); 
+        }
+
         if (bullet)
         {
             bullet.fire(in_AvionOrigen);
@@ -2487,6 +2671,40 @@ export default class s7_campoBatalla extends Phaser.Scene {
             //in_AvionOrigen.tieneBomba=false; --> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
         }
     }
+
+
+    function evento_avion_disparoBombaE(time, in_AvionOrigen){
+        ///juego_var_destinoCreacionBalas = 2; // --> para que era esto???
+    //console.log(in_AvionOrigen.z );
+        if (in_AvionOrigen.z == 200 && in_AvionOrigen.tieneBomba){
+            bombaBulletE.x=in_AvionOrigen.x;
+            bombaBulletE.y=in_AvionOrigen.y;
+            snd_caidaBomba.play();
+            //console.log(bombaBulletE);
+            tweenBombaE = sceneJuego.tweens.add({
+                targets: [ bombaBulletE ],
+                //x:'+=100',
+                scaleX:'-=5',
+                scaleY:'-=5',
+                duration: 2000,
+                ease: 'Power1'
+            });
+            snd_caidaBomba.stop();
+            bombaBulletE.body.enable=true;
+            timerBombaE = sceneJuego.time.addEvent({
+                delay: 2000,   // EN MILI SEGUNDOS
+                //callback: callback,
+                callback: enmascararBomba,
+                args: [bombaBulletE,tweenBombaE],
+                callbackScope: bombaBulletE,tweenBombaE,
+                loop: true,
+            });
+            //in_AvionOrigen.tieneBomba=false; --> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
+        }
+    }
+
+
+
 
     function setMaksAvion(in_avion){
         if (isEnSuTerritorio(in_avion)) {
@@ -2624,7 +2842,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             isAvionActivaAliadaViva = false;
             isAvionActivaEnemigaViva = false;
             setDestroyAvionAndGetNewActive(avion1, Gpo_AvionesAliados);
-            setDestroyAvionAndGetNewActive(avion2, Gpo_AvionesEnemigos);        
+            setDestroyAvionAndGetNewActive(avion2, Gpo_AvionesEnemigos);     
         }
     }
 
@@ -2665,6 +2883,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
     }
 
     function overlapEvent_impactoBalaEnAvionA(avion, bala ){
+        //console.log("entro al overlap overlapEvent_impactoBalaEnAvionA  a destruir mi avion");
         avion.vida--;
         snd_impacto_metralleta.play();
         bala.kill();
@@ -2675,6 +2894,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
     } 
 
     function overlapEvent_impactoBalaEnAvionE(avion, bala ){
+        //console.log("entro al overlap overlapEvent_impactoBalaEnAvionE  a destruir la avion contrincante");
         avion.vida--;
         snd_impacto_metralleta.play();
         bala.kill();
@@ -2694,10 +2914,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
-            Gpo_ElementosBaseAliada.killAndHide(elem_base);      
-            if (elem_base.getTotalUsed() == 0) {
+            Gpo_ElementosBaseAliada.killAndHide(elem_base);  
+
+            //console.log("Me destruyo algun elemento de mi base aliada");
+            if (Gpo_ElementosBaseAliada.getTotalUsed() == 0) {
+                //console.log("--Entro al igual 0 ya que tengo 0 elementos en mi base aliada");
                 condicionPerdidaAliado = true;
-            }  
+            } 
         } 
     } 
 
@@ -2715,7 +2938,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom.anims.play('explode');
             snd_explosion.play();
             Gpo_ElementosBaseEnemiga.killAndHide(elem_base);
-            //Gpo_ArtillerosAliados.killAndHide(torre);         
+            //Gpo_ArtillerosAliados.killAndHide(torre);  
+            if (Gpo_ElementosBaseEnemiga.getTotalUsed() == 0) {
+                sendDatosWebSocket("destruiUltimoElementoBaseEnemiga");
+                condicionPerdidaEnemigo = true;
+            }            
         } 
     } 
 
@@ -2749,9 +2976,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
             snd_explosion.play();
             elem_base.body.enable=false;
             Gpo_ElementosBaseAliada.killAndHide(elem_base);   
+            
             if (Gpo_ElementosBaseAliada.getTotalUsed() == 0) {
+                
                 condicionPerdidaAliado = true;
             }    
+
         } 
     } 
 
@@ -2765,6 +2995,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             elem_base.body.enable=false;
             Gpo_ElementosBaseEnemiga.killAndHide(elem_base); 
             if (Gpo_ElementosBaseEnemiga.getTotalUsed() == 0) {
+                sendDatosWebSocket("destruiUltimoElementoBaseEnemiga");
                 condicionPerdidaEnemigo = true;
             }   
         } 
@@ -2853,11 +3084,11 @@ function cargaElementosVistaLateral(){
     depositoDeCombustibleAliadoLateral.setVisible(false);
 }
 
-function reanudarJuego ()
+function switchVistaLateralAJuego ()
 {
-	if (pausar)
+	if (isEnVistaLateral)
 	{
-		pausar = false;
+		isEnVistaLateral = false;
 		/* sonidoReanudar.play();
 		opvReanudar();	
 		musicaFondo.play();*/
@@ -2872,21 +3103,21 @@ function reanudarJuego ()
         depositoDeCombustibleAliadoLateral.setVisible(false);
 
 	}
-	if (!pausar){
+	if (!isEnVistaLateral){
 		// ALGO
 	
 	}	 
 	
 }
-function pausarJuego ()
+function switchVistaJuegoToVistaLateral ()
 {
-	if (!pausar){
+	if (!isEnVistaLateral){
     
-        pausar = true;
+        isEnVistaLateral = true;
         /// sonidoPausa.play(); --> REPORDUZCO SONIDO
         // opvPausa(); --> SEND JSON
     }
-	if (pausar){
+	if (isEnVistaLateral){
             // DETENGO CUALQUIER SONIDO QUE ESTE CORRIENDO EN EL JUEGO
 			// DETENGO MUSICA DE FONDO --> musicaFondo.stop();
 			
@@ -2951,27 +3182,35 @@ function pausarJuego ()
             separacionVertical.setVisible(true);
 
             pistaDeAvionAliadaLateral.setVisible(true);
-            depositoDeBombasAliadoLateral.setVisible(true);
-            torreControlAliadaLateral.setVisible(true);
-            depositoDeCombustibleAliadoLateral.setVisible(true);
             
+            if (deposito_bombasAliado.vida > 0) {
+                depositoDeBombasAliadoLateral.setVisible(true);
+            }
+            if (deposito_combustibleAliado.vida > 0) {
+                depositoDeCombustibleAliadoLateral.setVisible(true);
+            }
+            if (torreControlAliada.vida > 0) {
+                torreControlAliadaLateral.setVisible(true);
+
+                if (torreControlAliada.hayEnemigo) {
+                    if (jugadorMiNumero == 1) {
+                        colorBando = 'torreControl_VLateral_negra_activa';
+                    } else {
+                        colorBando = 'torreControl_VLateral_roja_activa';
+                    }
+                    torreControlAliadaLateral.setTexture(colorBando);
+                }else{
+                    if (jugadorMiNumero == 1) {
+                        colorBando = 'torreControl_VLateral_negra';
+                    } else {
+                        colorBando = 'torreControl_VLateral_roja';
+                    }
+                    torreControlAliadaLateral.setTexture(colorBando);
+                }
+            }
             var sgm_pantalla = (campoAliado_h+campoEnemigo_h)/3;
 	
-            if (torreControlAliada.hayEnemigo) {
-                if (jugadorMiNumero == 1) {
-                    colorBando = 'torreControl_VLateral_negra_activa';
-                } else {
-                    colorBando = 'torreControl_VLateral_roja_activa';
-                }
-                torreControlAliadaLateral.setTexture(colorBando);
-            }else{
-                if (jugadorMiNumero == 1) {
-                    colorBando = 'torreControl_VLateral_negra';
-                } else {
-                    colorBando = 'torreControl_VLateral_roja';
-                }
-                torreControlAliadaLateral.setTexture(colorBando);
-            }
+
 
 
 	}else{

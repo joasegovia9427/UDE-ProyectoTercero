@@ -30,17 +30,16 @@ public class WebSocketPartida {
 	////// SINGLETON
 	private static WebSocketPartida webSocketUnicaInstancia; 
 	
-//	////Colección de SESSION, para todo el websocket
-//	private static Set<Session> webSocketAllSessions = new HashSet<>();
-//	
-//	////Colección de {PARTIDA,{SESSION}} para guardar esa asociación, para todo el websocket
-//	private static Map<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
-//	
+	////Colección de SESSION, para todo el websocket
+	private static Set<Session> webSocketAllSessions = new HashSet<>();
+	
+	////Colección de {PARTIDA,{SESSION}} para guardar esa asociación, para todo el websocket
+	private static Map<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
 	
 
 	
-	private static HashMap<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
-    private static Set<Session> webSocketAllSessions = Collections.synchronizedSet(new HashSet<Session>());
+//	private static HashMap<String, ArrayList<Session>> webSocketAllPartidaSessions = new HashMap<String, ArrayList<Session>>();
+//    private static Set<Session> webSocketAllSessions = Collections.synchronizedSet(new HashSet<Session>());
 	
     @OnOpen
 	public static WebSocketPartida getInstancia(Session in_Session) {  ////antes era public void onOpen(Session session) {
