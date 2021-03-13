@@ -1,4 +1,4 @@
-/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 08a  ---- ultimo modificador:: Joaquin--- con intento de espejado ---
+/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 13a  ---- ultimo modificador:: Joaquin--- con intento de espejado ---
 
 
 
