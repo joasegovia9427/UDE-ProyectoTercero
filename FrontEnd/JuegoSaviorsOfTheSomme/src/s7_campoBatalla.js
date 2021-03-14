@@ -1,19 +1,20 @@
-/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 13b  ---- ultimo modificador:: Joaquin---  ---
+/////----------------version del archivo numero::  FrontEnd_respaldo_2021 04 13c  ---- ultimo modificador:: Joaquin---  ---
 
 
 
 /////-----------------INICIO VARIABLES GLOBALES--------------------
 var sceneJuego;
 var cursors;
-
+//
 var isJuegoEnPausa = false;
-var quienPauso = 0;
-var quienPidioPausa;
+var quienPidioPausa=0;
 
 var ultimaTeclaPresionada;
 var ultimaTeclaPresionadaAux;
 var spotlight;
 var spotlight_instance;
+
+var avionCombustibleDefault = 10000;
 
 var origen_x = 0; var origen_y = 0;
 var campoEnemigo_x; var campoEnemigo_y; var campoEnemigo_w; var campoEnemigo_h;
@@ -24,7 +25,9 @@ var baseEnemiga_x; var baseEnemiga_y; var baseEnemiga_w; var baseEnemiga_h;
 var baseAliada_x; var baseAliada_y; var baseAliada_w; var baseAliada_h;
 
 var tableroAvion;
+var tableroAvionCuidado;
 var tableroBase;
+var tableroBaseCuidado;
 
 var cantidadAvionesAliadas      = 0;
 var cantidadAvionesEnemigas     = 0; 
@@ -549,7 +552,6 @@ function onMessage(event) {
                     break;
                 case "juegoReanudar":
                     //var quienPidioReanudar = data.quienReanudo;
-
                     juegoReanudar();
 
                     break;
@@ -1513,10 +1515,24 @@ export default class s7_campoBatalla extends Phaser.Scene {
         this.physics.add.overlap(artilleroE_6.bullets_artillero_Enemigo, Gpo_AvionesAliados, overlapEvent_impactoBalaEnAvionA, null, this); 
 
 
+        this.physics.add.overlap(avionAliada_Activa, pistaAvionesAliada, overlapEvent_avionSobrePistaBase, null, this);
+        this.physics.add.overlap(avionEnemiga_Activa, pistaAvionesEnemiga, overlapEvent_avionSobrePistaBase, null, this); 
+
+        this.physics.add.overlap(avionA_1, pistaAvionesAliada, overlapEvent_avionSobrePistaBase, null, this);
+        this.physics.add.overlap(avionA_2, pistaAvionesAliada, overlapEvent_avionSobrePistaBase, null, this); 
+        this.physics.add.overlap(avionA_3, pistaAvionesAliada, overlapEvent_avionSobrePistaBase, null, this);
+        this.physics.add.overlap(avionA_4, pistaAvionesAliada, overlapEvent_avionSobrePistaBase, null, this); 
+        this.physics.add.overlap(avionE_1, pistaAvionesEnemiga, overlapEvent_avionSobrePistaBase, null, this);
+        this.physics.add.overlap(avionE_2, pistaAvionesEnemiga, overlapEvent_avionSobrePistaBase, null, this); 
+        this.physics.add.overlap(avionE_3, pistaAvionesEnemiga, overlapEvent_avionSobrePistaBase, null, this);
+        this.physics.add.overlap(avionE_4, pistaAvionesEnemiga, overlapEvent_avionSobrePistaBase, null, this); 
+
         ///// CREACION DE TABLERO AVION
         tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '20px Courier Bold', fill: '#00ff00' });
+        tableroAvionCuidado = this.add.text(20, 102, 'Combustible:', { font: '20px Courier Bold', fill: '#ff0000' });
         ///// CREACION DE TABLERO BASE
         tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '20px Courier Bold', fill: '#ffffff' });
+        tableroBaseCuidado = this.add.text(20, 482, 'Cant. Aviones:', { font: '20px Courier Bold', fill: '#ff0000' });
         
         tableroAvion.setDepth(9);
         tableroBase.setDepth(4)
@@ -1663,12 +1679,23 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
                 //// ACTUALIZAR TEXTO DE TABLERO AVION:
                 
+                var textoAux = "";
+                if (avionAliada_Activa.tieneBomba) {
+                    textoAux = "Ya tienes bomba cargada";
+                } else {
+                    textoAux = "Pasa sobre tu pista volando bajo para recargar";
+                }
+               /*  if (avionAliada_Activa.cantCombustible <= ) {
+                    
+                } else {
+                    
+                } */
                 tableroAvion.setText([
                     'DATOS AVION:',
         /*           'x: ' + avionAliada_Activa.body.speed,
                     'y: ' + avionAliada_Activa.y, */
                     'Altura: ' + avionAliada_Activa.z,
-                    'Bomba: ' + avionAliada_Activa.tieneBomba,
+                    'Bomba: ' + textoAux,
                     'Vida: ' + avionAliada_Activa.vida,
                     'Combustible: ' + avionAliada_Activa.cantCombustible,
                 ]);
@@ -1722,7 +1749,6 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 //////DETECTAR SI AVIONES ENEMIGAS PASAN SOBRE LA TORRE
                 hayEnemigoEnRangoTorreDeControl(time);
                 hayAliadoEnRangoTorreDeControl(time);
-
 
             }else{
                 
@@ -1908,19 +1934,26 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
                 break;
             case Phaser.Input.Keyboard.KeyCodes.P:
+                isPressY5Times = 0;
+                ////console.log("Yo Soy::"+jugadorMiNumero);
+                ////console.log("Juego en Pausa?::"+isJuegoEnPausa);
                 ////Paausar juego y mostrar tablero de opcion para rendirse y salir; o guardar    
+                if ((quienPidioPausa == 0) || (quienPidioPausa==jugadorMiNumero)){
                     if (isJuegoEnPausa == false) {
                         isJuegoEnPausa = true;
+                        quienPidioPausa=jugadorMiNumero;
                         sendDatosWebSocket("juegoPausar");
-
-                        //quienPauso = jugadorMiNumero;
                         juegoPausar();
+                        //////////////////////aca va mostrarMenu();
+                        /////console.log("Quien pidio pausa::"+quienPidioPausa);
                     } else {
                         isJuegoEnPausa = false;
                         sendDatosWebSocket("juegoReanudar");
-
                         juegoReanudar();
                     }
+                ////console.log("Actual Jugador que Pauso::"+quienPidioPausa);
+                }
+              
                 break;
             case Phaser.Input.Keyboard.KeyCodes.Y:
                 isPressY5Times = isPressY5Times+1;
@@ -2626,7 +2659,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         avion.angle = 0;
         avion.tieneBomba = true;
         avion.cantBombas = 1;
-        avion.cantCombustible = 10000;
+        avion.cantCombustible = avionCombustibleDefault;
         avion.unidadDeVelocidad = 0;
         avion.unidadDeConsumoCombustible = 0;
         avion.isAvionEnCampoEnemigo = false;
@@ -2865,7 +2898,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 callbackScope: bombaBulletA,tweenBombaA,
                 loop: true,
             });
-            //in_AvionOrigen.tieneBomba=false; --> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
+            in_AvionOrigen.tieneBomba=false; ////--> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
         }
     }
 
@@ -2896,7 +2929,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 callbackScope: bombaBulletE,tweenBombaE,
                 loop: true,
             });
-            //in_AvionOrigen.tieneBomba=false; --> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
+            //in_AvionOrigen.tieneBomba=false; ////--> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
         }
     }
 
@@ -3014,6 +3047,12 @@ export default class s7_campoBatalla extends Phaser.Scene {
         }
         
     }
+
+    function setRecargarElementosAvion(in_Avion_Activa){
+        in_Avion_Activa.cantCombustible = avionCombustibleDefault;
+        in_Avion_Activa.tieneBomba = true;
+    }
+
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------FIN Eventos Avion Genericos
 /////////////////---------------------------------------------------------------------------------------
@@ -3114,6 +3153,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
+
             Gpo_ElementosBaseAliada.killAndHide(elem_base);  
 
             if (Gpo_ElementosBaseAliada.getTotalUsed() == 0) {
@@ -3135,6 +3175,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
+
             Gpo_ElementosBaseEnemiga.killAndHide(elem_base);
             //Gpo_ArtillerosAliados.killAndHide(torre);  
             if (Gpo_ElementosBaseEnemiga.getTotalUsed() == 0) {
@@ -3150,6 +3191,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
+
             artillero.body.enable=false;
             Gpo_ArtillerosAliados.killAndHide(artillero);   
         } 
@@ -3161,6 +3203,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(artillero.x, artillero.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
+
             artillero.body.enable=false;
             Gpo_ArtillerosEnemigos.killAndHide(artillero);   
         } 
@@ -3172,6 +3215,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom = this.add.sprite(elem_base.x, elem_base.y, 'explosion');
             boom.anims.play('explode');
             snd_explosion.play();
+            sceneJuego.cameras.main.shake(200, 0.02);
             elem_base.body.enable=false;
             Gpo_ElementosBaseAliada.killAndHide(elem_base);   
             
@@ -3191,6 +3235,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             boom.anims.play('explode');
             snd_explosion.play();
             elem_base.body.enable=false;
+            sceneJuego.cameras.main.shake(200, 0.02);
             Gpo_ElementosBaseEnemiga.killAndHide(elem_base); 
             if (Gpo_ElementosBaseEnemiga.getTotalUsed() == 0) {
                 sendDatosWebSocket("destruiUltimoElementoBaseEnemiga");
@@ -3198,6 +3243,16 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }   
         } 
     }
+
+
+    function overlapEvent_avionSobrePistaBase(inAvion, inPista){
+        if (inAvion.enPista == false) {
+            if (inAvion.z == 0) {
+                setRecargarElementosAvion(inAvion);
+            } 
+        }       
+    }
+
 
 /////////////////---------------------------------------------------------------------------------------
 /////////////////-------------FIN Eventos OVERLAP----------------------------------
@@ -3453,10 +3508,10 @@ function juegoPausar(){
     console.log("entro a function juegoPausar");
 
     isJuegoEnPausa = true;
-
+    //tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#F11FFF' });
     tableroAvion.setText([
         'PARTIDA PAUSADA',
-    ]);   
+    ]); 
     
     avionAliada_Activa.setVelocity(0,0);
     avionEnemiga_Activa.setVelocity(0,0);
@@ -3479,7 +3534,6 @@ function juegoPausar(){
 function juegoReanudar(){
     console.log("entro a function juegoReanudar");
 
-    if (  (quienPidioPausa == jugadorMiNumero)   ||   (quienPidioPausa == 0 )  ) {
         //tableroAvion.visible = false;
 
         isJuegoEnPausa = false;
@@ -3488,8 +3542,9 @@ function juegoReanudar(){
         avionEnemiga_Activa.setVelocity(avionEnemiga_Activa.ultimaVX,avionEnemiga_Activa.ultimaVY);
         
         quienPidioPausa = 0;
-    }
-    
 }
+
+
+
 
 
