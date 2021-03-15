@@ -12,77 +12,236 @@
     <body>
         <div id="phaser-app"></div>
 
+       <div id="iframeMenuOut" > 
+            <iframe width="1000" height="600" src="menu.html" frameborder="0" scrolling="no" allowfullscreen></iframe>    
+        </div>
+
+
         <script src="./node_modules/phaser/dist/phaser-arcade-physics.js"></script>
         <script src="./node_modules/phaser/dist/phaser.js"></script>
         
 
         <script>
             
-            
+            //////no modificar estas variables
             juego_var_sceneJuego = 0;
-
             juego_var_nav_width   = 1000;
             juego_var_nav_height  = 600;
-
             juego_var_rangoVisionAvion      = 100;
-            juego_var_rangoVisionArtillero  = 100;
-            juego_var_rangoVisionTorre      = 200;
-
+            juego_var_rangoVisionArtillero  = 70;
+            juego_var_rangoVisionTorre      = 130;
             juego_var_destinoCreacionBalas = 0;
             ////0-torre
             ////1-artillero
             ////2-avion
+            
 
-            juego_var_isPartidaNueva = true;
 
+            /////////-------------------VARIABLES CARGADAS DESDE EL JSP-------------------------
+            juego_var_isPartidaNueva = true;  /////si es desde un crear partida poner en true sino, si es un reanudar, setear con false;
+            juego_var_codigoIdPartida = 0;  ////id random de la partida creada o id de la partida a ranudar
+            juego_var_JugadorQueSoy = 0;    //// completar con 1 si el jugador que redireccionas en el creador o el reanudador y 2 si es el invitado
+            juego_var_JugadorQueSoy_ID = 0;
+
+            //////////////// a apartir de aca, si es una partida nueva, no actualizar estas variables
+            ////// de modo contrario si actualizar estas variables 
+
+            ///// el que ejecuta la entrada se le cargan estos datos...
             juego_var_Aliado_cantidadAviones        = 4;
             juego_var_Aliado_cantidadArtilleros     = 6;
             juego_var_Aliado_tieneTorreDeControl    = 1;
             juego_var_Aliado_tieneDepCombustible    = 1;
             juego_var_Aliado_tieneDepBombas         = 1;
 
-            juego_var_Enemigo_cantidadAviones       = 4;
-            juego_var_Enemigo_cantidadArtilleros    = 6;
-            juego_var_Enemigo_tieneTorreDeControl   = 1;
-            juego_var_Enemigo_tieneDepCombustible   = 1;
-            juego_var_Enemigo_tieneDepBombas        = 1;
+            juego_var_Aliado_deposito_combustible_X = 0;
+            juego_var_Aliado_deposito_combustible_Y = 0;
+            juego_var_Aliado_deposito_combustible_Vida = 0;
+
+            juego_var_Aliado_torreControl_X = 0;
+            juego_var_Aliado_torreControl_Y = 0;
+            juego_var_Aliado_torreControl_Vida = 0;
+            juego_var_Aliado_torreControl_HayEnemigo = false;
+
+            juego_var_Aliado_deposito_bombas_X = 0;
+            juego_var_Aliado_deposito_bombas_Y = 0;
+            juego_var_Aliado_deposito_bombas_Vida = 0;
+
+            juego_var_Aliado_avion1_X = 0;
+            juego_var_Aliado_avion1_Y = 0;
+            juego_var_Aliado_avion1_Z = 0;
+            juego_var_Aliado_avion1_Vida = 0;
+            juego_var_Aliado_avion1_HayEnemigo = false;
+            juego_var_Aliado_avion1_TieneBomba = false;
+            juego_var_Aliado_avion1_CantCombustible = 0;
+            juego_var_Aliado_avion1_EsEnCampoEnemigo = false;
 
 
- 
+            juego_var_Aliado_avion2_X = 0;
+            juego_var_Aliado_avion2_Y = 0;
+            juego_var_Aliado_avion2_Z = 0;
+            juego_var_Aliado_avion2_Vida = 0;
+            juego_var_Aliado_avion2_HayEnemigo = false;
+            juego_var_Aliado_avion2_Angulo = 0;
+            juego_var_Aliado_avion2_TieneBomba = false;
+            juego_var_Aliado_avion2_CantCombustible = 0;
+            juego_var_Aliado_avion2_EsEnCampoEnemigo = false;
 
-/*             global_var_s3_x= 0;
-            global_var_s3_y= 0;
-            global_var_s3_w= 0;
-            global_var_s3_h= 0; 
-            global_var_s4_x= 0;
-            global_var_s4_y= 0;
-            global_var_s4_w= 0;
-            global_var_s4_h= 0; 
-            global_var_s5_x= 0;
-            global_var_s5_y= 0;
-            global_var_s5_w= 0;
-            global_var_s5_h= 0; 
-            global_var_s7_x= 0;
-            global_var_s7_y= 0;
-            global_var_s7_w= 0;
-            global_var_s7_h= 0;  */
+            juego_var_Aliado_avion3_X = 0;
+            juego_var_Aliado_avion3_Y = 0;
+            juego_var_Aliado_avion3_Z = 0;
+            juego_var_Aliado_avion3_Vida = 0;
+            juego_var_Aliado_avion3_HayEnemigo = false;
+            juego_var_Aliado_avion3_Angulo = 0;
+            juego_var_Aliado_avion3_TieneBomba = false;
+            juego_var_Aliado_avion3_CantCombustible = 0;
+            juego_var_Aliado_avion3_EsEnCampoEnemigo = false;
 
+            juego_var_Aliado_avion4_X = 0;
+            juego_var_Aliado_avion4_Y = 0;
+            juego_var_Aliado_avion4_Z = 0;
+            juego_var_Aliado_avion4_Vida = 0;
+            juego_var_Aliado_avion4_HayEnemigo = false;
+            juego_var_Aliado_avion4_Angulo = 0;
+            juego_var_Aliado_avion4_TieneBomba = false;
+            juego_var_Aliado_avion4_CantCombustible = 0;
+            juego_var_Aliado_avion4_EsEnCampoEnemigo = false;
 
-    /*         global_var_s1_x= 0;
-            global_var_s1_y= 0;
-            global_var_s1_w= 0;
-            global_var_s1_h= 0; 
+            juego_var_Aliado_artillero1_X = 0;
+            juego_var_Aliado_artillero1_Y = 0;
+            juego_var_Aliado_artillero1_Vida = 0;
+            juego_var_Aliado_artillero1_HayEnemigo = false;
+            juego_var_Aliado_artillero1_Angulo = 0;
             
-            global_var_s2_x= 0;
-            global_var_s2_y= 0;
-            global_var_s2_w= 0;
-            global_var_s2_h= 0; 
+
+            juego_var_Aliado_artillero2_X = 0;
+            juego_var_Aliado_artillero2_Y = 0;
+            juego_var_Aliado_artillero2_Vida = 0;
+            juego_var_Aliado_artillero2_HayEnemigo = false;
+            juego_var_Aliado_artillero2_Angulo = 0;
+            
+            juego_var_Aliado_artillero3_X = 0;
+            juego_var_Aliado_artillero3_Y = 0;
+            juego_var_Aliado_artillero3_Vida = 0;
+            juego_var_Aliado_artillero3_HayEnemigo = false;
+            juego_var_Aliado_artillero3_Angulo = 0;
+
+            juego_var_Aliado_artillero4_X = 0;
+            juego_var_Aliado_artillero4_Y = 0;
+            juego_var_Aliado_artillero4_Vida = 0;
+            juego_var_Aliado_artillero4_HayEnemigo = false;
+            juego_var_Aliado_artillero4_Angulo = 0;
+			
+			juego_var_Aliado_artillero5_X = 0;
+            juego_var_Aliado_artillero5_Y = 0;
+            juego_var_Aliado_artillero5_Vida = 0;
+            juego_var_Aliado_artillero5_HayEnemigo = false;
+            juego_var_Aliado_artillero5_Angulo = 0;
+			
+            juego_var_Aliado_artillero6_X = 0;
+            juego_var_Aliado_artillero6_Y = 0;
+            juego_var_Aliado_artillero6_Vida = 0;
+            juego_var_Aliado_artillero6_HayEnemigo = false;
+            juego_var_Aliado_artillero6_Angulo = 0;
+			
+
+            ///////////el segundo que tiene los datos actualizar estas//////////////////////
+            juego_var_Enemigo_cantidadAviones        = 4;
+            juego_var_Enemigo_cantidadArtilleros     = 6;
+            juego_var_Enemigo_tieneTorreDeControl    = 1;
+            juego_var_Enemigo_tieneDepCombustible    = 1;
+            juego_var_Enemigo_tieneDepBombas         = 1;
+
+            juego_var_Enemigo_deposito_combustible_X = 0;
+            juego_var_Enemigo_deposito_combustible_Y = 0;
+            juego_var_Enemigo_deposito_combustible_Vida = 0;
+
+            juego_var_Enemigo_torreControl_X = 0;
+            juego_var_Enemigo_torreControl_Y = 0;
+            juego_var_Enemigo_torreControl_Vida = 0;
+            juego_var_Enemigo_torreControl_HayEnemigo = false;
+
+            juego_var_Enemigo_deposito_bombas_X = 0;
+            juego_var_Enemigo_deposito_bombas_Y = 0;
+            juego_var_Enemigo_deposito_bombas_Vida = 0;
+
+            juego_var_Enemigo_avion1_X = 0;
+            juego_var_Enemigo_avion1_Y = 0;
+            juego_var_Enemigo_avion1_Z = 0;
+            juego_var_Enemigo_avion1_Vida = 0;
+            juego_var_Enemigo_avion1_HayEnemigo = false;
+            juego_var_Enemigo_avion1_TieneBomba = false;
+            juego_var_Enemigo_avion1_CantCombustible = 0;
+            juego_var_Enemigo_avion1_EsEnCampoEnemigo = false;
+
+
+            juego_var_Enemigo_avion2_X = 0;
+            juego_var_Enemigo_avion2_Y = 0;
+            juego_var_Enemigo_avion2_Z = 0;
+            juego_var_Enemigo_avion2_Vida = 0;
+            juego_var_Enemigo_avion2_HayEnemigo = false;
+            juego_var_Enemigo_avion2_Angulo = 0;
+            juego_var_Enemigo_avion2_TieneBomba = false;
+            juego_var_Enemigo_avion2_CantCombustible = 0;
+            juego_var_Enemigo_avion2_EsEnCampoEnemigo = false;
+
+            juego_var_Enemigo_avion3_X = 0;
+            juego_var_Enemigo_avion3_Y = 0;
+            juego_var_Enemigo_avion3_Z = 0;
+            juego_var_Enemigo_avion3_Vida = 0;
+            juego_var_Enemigo_avion3_HayEnemigo = false;
+            juego_var_Enemigo_avion3_Angulo = 0;
+            juego_var_Enemigo_avion3_TieneBomba = false;
+            juego_var_Enemigo_avion3_CantCombustible = 0;
+            juego_var_Enemigo_avion3_EsEnCampoEnemigo = false;
+
+            juego_var_Enemigo_avion4_X = 0;
+            juego_var_Enemigo_avion4_Y = 0;
+            juego_var_Enemigo_avion4_Z = 0;
+            juego_var_Enemigo_avion4_Vida = 0;
+            juego_var_Enemigo_avion4_HayEnemigo = false;
+            juego_var_Enemigo_avion4_Angulo = 0;
+            juego_var_Enemigo_avion4_TieneBomba = false;
+            juego_var_Enemigo_avion4_CantCombustible = 0;
+            juego_var_Enemigo_avion4_EsEnCampoEnemigo = false;
+
+            juego_var_Enemigo_artillero1_X = 0;
+            juego_var_Enemigo_artillero1_Y = 0;
+            juego_var_Enemigo_artillero1_Vida = 0;
+            juego_var_Enemigo_artillero1_HayEnemigo = false;
+            juego_var_Enemigo_artillero1_Angulo = 0;
             
 
-            global_var_s6_x= 0;
-            global_var_s6_y= 0;
-            global_var_s6_w= 0;
-            global_var_s6_h= 0;  */
+            juego_var_Enemigo_artillero2_X = 0;
+            juego_var_Enemigo_artillero2_Y = 0;
+            juego_var_Enemigo_artillero2_Vida = 0;
+            juego_var_Enemigo_artillero2_HayEnemigo = false;
+            juego_var_Enemigo_artillero2_Angulo = 0;
+            
+            juego_var_Enemigo_artillero3_X = 0;
+            juego_var_Enemigo_artillero3_Y = 0;
+            juego_var_Enemigo_artillero3_Vida = 0;
+            juego_var_Enemigo_artillero3_HayEnemigo = false;
+            juego_var_Enemigo_artillero3_Angulo = 0;
+
+            juego_var_Enemigo_artillero4_X = 0;
+            juego_var_Enemigo_artillero4_Y = 0;
+            juego_var_Enemigo_artillero4_Vida = 0;
+            juego_var_Enemigo_artillero4_HayEnemigo = false;
+            juego_var_Enemigo_artillero4_Angulo = 0;
+			
+			juego_var_Enemigo_artillero5_X = 0;
+            juego_var_Enemigo_artillero5_Y = 0;
+            juego_var_Enemigo_artillero5_Vida = 0;
+            juego_var_Enemigo_artillero5_HayEnemigo = false;
+            juego_var_Enemigo_artillero5_Angulo = 0;
+			
+            juego_var_Enemigo_artillero6_X = 0;
+            juego_var_Enemigo_artillero6_Y = 0;
+            juego_var_Enemigo_artillero6_Vida = 0;
+            juego_var_Enemigo_artillero6_HayEnemigo = false;
+            juego_var_Enemigo_artillero6_Angulo = 0;
+
+
         </script> 
 
 

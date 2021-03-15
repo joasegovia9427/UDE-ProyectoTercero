@@ -39,7 +39,10 @@ const config = {
     parent: 'phaser-app',
     width: juego_var_nav_width, //(juego_var_nav_width) - 20,
     height: juego_var_nav_height, //(juego_var_nav_height) - 20,   
-    scene: [s7_campoBatalla], //s3_vistaLateral, s4_tableroInfo, s5_menu
+	dom: {
+        createContainer: true
+    },
+	scene: [s7_campoBatalla], //s3_vistaLateral, s4_tableroInfo, s5_menu
 	physics: {
 		default: "arcade",
 		arcade: {

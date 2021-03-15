@@ -3,6 +3,9 @@
 
 
 /////-----------------INICIO VARIABLES GLOBALES--------------------
+var modal = document.getElementById("iframeMenuOut");
+modal.style.display = "none";
+
 var sceneJuego;
 var cursors;
 //
@@ -17,7 +20,7 @@ var ultimaTeclaPresionadaAux;
 var spotlight;
 var spotlight_instance;
 
-var avionCombustibleDefault = 10000;
+var avionCombustibleDefault = 2000;//10000;
 
 var origen_x = 0; var origen_y = 0;
 var campoEnemigo_x; var campoEnemigo_y; var campoEnemigo_w; var campoEnemigo_h;
@@ -224,7 +227,7 @@ var destruiAlgunArtilleroEnemigoCual;
 var webSocket = new WebSocket("ws://localhost:8080/prueba/webSocketEndPointPartida");
 webSocket.onmessage = onMessage;
 
-var partidaID = "1234"//Math.round(Math.random() * 9999); ////got by previous html...
+var partidaID = "1234"//;//Math.round(Math.random() * 9999); ////got by previous html...
 var isIngresoPorPrimeraVez = true; ////luego de conectar esto ya se me actualiza a false desde dentro del server
 var isWSOpen = "true";
 var mi_SessId = "mi_sessIdToChange";  ////luego de conectar esto ya se me actualiza  desde dentro del server
@@ -234,17 +237,12 @@ var dataJson;
 var datosRecibidosDesdeJugadorNumero;
 
 var jugadorMiNumero = 0;
-
 var ejecutaOnMessagePorPrimeraVez = true;
-
-
-
 var isEnvioMisDatosBase = true;
 var datosASync;
-
 var colorBando;
-
 var termineDeCrearElTablero = false;
+var elementMenuOut;
 
 ///// METODOS WEBSOCKETS
 webSocket.onopen = function(event) {
@@ -255,10 +253,14 @@ webSocket.onopen = function(event) {
         jugadorMiNumero = 2;
     }
     //jugadorMiNumero = 1;
+    //jugadorMiNumero = juego_var_JugadorQueSoy;
     console.log("Me toco ser el jugadorMiNumero::"+ jugadorMiNumero);
 
     console.log("WebSocket is open now.");
     isWSOpen = "true"; 
+
+    ///partidaID = juego_var_codigoIdPartida;
+    console.log("partidaID::"+ partidaID);
 
     rows =
     { "partidaId": partidaID
@@ -956,6 +958,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
         super({key: "s7_campoBatalla", active: true});
     }
     preload() {
+
         /* alert(juego_var_nav_width   +"  ---x---   "+juego_var_nav_height); */
         campoEnemigo_x      = (origen_x); 
         campoEnemigo_y      = (origen_y); 
@@ -1111,6 +1114,11 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         this.load.image("superOne","./assets/images/objetos/superOne.png");
 
+
+        ////// LOAD DE HTML MENU OUT
+        this.load.html("menuOut","./menu.html")
+
+
     } ////CIERRE PRELOAD
 
     
@@ -1118,8 +1126,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
     /////////////////-------------------------INICIO CREATE -----------------------------------
     /////////////////-----------------------------------------------------------------------------------
     create() {
-
-
+        //elementMenuOut = this.add.dom(100, 100).createFromCache("menuOut");
+        //elementMenuOut.setPerspective(800);
 
 
         sceneJuego = this;
@@ -1227,6 +1235,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
+
             }
 
        
@@ -1300,6 +1309,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
             }else{
                 /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
                 ////datos from json
+                
+                //// ajustar la x para que se muestre en base al primer elemento de base que traje del jsp
             }
 
 
@@ -1397,6 +1408,8 @@ export default class s7_campoBatalla extends Phaser.Scene {
         }else{
             /////IF ES UNA PARTIDA CARGADA DE LAS GUARDADAS.... IGUALAR TODOS LOS DATOS DE 
             ////datos from json
+
+            
         }
 
 
@@ -1666,17 +1679,20 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
         ///// CREACION DE TABLERO AVION
         tableroAvion = this.add.text(20, 20, 'Move the mouse', { font: '20px Courier Bold', fill: '#00ff00' });
-        tableroAvionCuidado = this.add.text(20, 102, 'Combustible:', { font: '20px Courier Bold', fill: '#ff0000' });
-        ///// CREACION DE TABLERO BASE
-        tableroBase = this.add.text(20, 380, 'Move the mouse', { font: '20px Courier Bold', fill: '#ffffff' });
-        tableroBaseCuidado = this.add.text(20, 482, 'Cant. Aviones:', { font: '20px Courier Bold', fill: '#ff0000' });
-        
-        tableroEstadoPartida = this.add.text(380, 280, 'Aqui va el estado de la partida', { font: '40px Courier Bold', fill: '#ff0000' });
-        tableroEstadoPartida.visible=false;
-       
-        tableroEstadoPartida.setDepth(9);
         tableroAvion.setDepth(9);
+        tableroAvionCuidado = this.add.text(20, 103, 'Combustible:', { font: '20px Courier Bold', fill: '#ff0000' });
+        tableroAvionCuidado.setDepth(9);
+        ///// CREACION DE TABLERO BASE
+        tableroBase = this.add.text(20, 350, 'Move the mouse', { font: '20px Courier Bold', fill: '#ffffff' });
         tableroBase.setDepth(9);
+        tableroBaseCuidado = this.add.text(20, 452, 'Cant. Aviones:', { font: '21px Courier Bold', fill: '#ff0000' });
+        tableroBaseCuidado.setDepth(9);
+        
+        tableroEstadoPartida = this.add.text(380, 270, 'Aqui va el estado de la partida', { font: '40px Courier Bold', fill: '#ff0000'});
+        tableroEstadoPartida.visible=false;
+        tableroEstadoPartida.setDepth(9);
+        
+        
 
         /// CREO UN TIMER PARA QUE CADA 15 SEGS MUEVA LOS ARTILLEROS RANDOM.
         timer = this.time.addEvent({
@@ -1842,15 +1858,32 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 } else {
                     
                 } */
-                tableroAvion.setText([
-                    'DATOS AVION:',
-        /*           'x: ' + avionAliada_Activa.body.speed,
-                    'y: ' + avionAliada_Activa.y, */
-                    'Altura: ' + avionAliada_Activa.z,
-                    'Bomba: ' + textoAux,
-                    'Vida: ' + avionAliada_Activa.vida,
-                    'Combustible: ' + avionAliada_Activa.cantCombustible,
-                ]);
+                if (avionAliada_Activa.cantCombustible < (avionCombustibleDefault*0.20) ) {
+                    tableroAvion.setText([
+                        'DATOS AVION:',
+            /*           'x: ' + avionAliada_Activa.body.speed,
+                        'y: ' + avionAliada_Activa.y, */
+                        'Altura: ' + avionAliada_Activa.z,
+                        'Bomba: ' + textoAux,
+                        'Vida: ' + avionAliada_Activa.vida,
+                    ]);
+                    tableroAvionCuidado.visible = true;
+                    tableroAvionCuidado.setText([
+                        'Combustible: ' + avionAliada_Activa.cantCombustible,
+                    ]);
+                } else {
+                    tableroAvion.setText([
+                        'DATOS AVION:',
+            /*           'x: ' + avionAliada_Activa.body.speed,
+                        'y: ' + avionAliada_Activa.y, */
+                        'Altura: ' + avionAliada_Activa.z,
+                        'Bomba: ' + textoAux,
+                        'Vida: ' + avionAliada_Activa.vida,
+                        'Combustible: ' + avionAliada_Activa.cantCombustible,
+                    ]);
+                    tableroAvionCuidado.visible = false;
+                }
+
 
                 
                 ////descuento de combustible
@@ -1862,20 +1895,36 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 setMaksAvion(avionEnemiga_Activa);
 
                 //// ACTUALIZAR TEXTO DE TABLERO BASE:
-                tableroBase.setText([
-                    'DATOS BASE:',
-                    'Vida de Torre: ' + torreControlAliada.vida + '%',
-                    'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
-                    'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
-                    'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
-                    'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
-                ]);
+                if (Gpo_AvionesAliados.getTotalUsed() <= 1) {
+                    tableroBase.setText([
+                        'DATOS BASE:',
+                        'Vida de Torre: ' + torreControlAliada.vida + '%',
+                        'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                        'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
+                        'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
+                    ]);
+                    tableroBaseCuidado.visible = true;
+                    tableroBaseCuidado.setText([
+                        'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
+                    ]);
+                } else {
+                    tableroBase.setText([
+                        'DATOS BASE:',
+                        'Vida de Torre: ' + torreControlAliada.vida + '%',
+                        'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                        'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
+                        'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
+                        'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
+                    ]);
+                    tableroBaseCuidado.visible = false;
+                }
+
 
                 
                 if (avionAliada_Activa.vida > 0) {
                     ////avionAliada_Activa = avionAliada_Activa;
                     //////DETECTAR SI SE QUEDA SIN NAFTA EXPLOTA
-                    hayCombutible(avionAliada_Activa);
+                    hayCombustible(avionAliada_Activa);
                 }else{
                     avionAliada_Activa.body.enable = false;
                 }
@@ -1912,23 +1961,40 @@ export default class s7_campoBatalla extends Phaser.Scene {
                         tableroEstadoPartida.visible=true;
                         //tableroAvion.visible = false;
                         //tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#ff0000' });
+                        tableroEstadoPartida.x = 370;
                         tableroEstadoPartida.setText([
                             '¡¡¡PERDISTE!!',
                         ]);
                         tableroEstadoPartida.setColor('#FF0040');
                         //// ACTUALIZAR TEXTO DE TABLERO BASE:
-                        tableroBase.setText([
-                            'DATOS BASE:',
-                            'Vida de Torre: ' + torreControlAliada.vida + '%',
-                            'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
-                            'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
-                            'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
-                            'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
-                        ]);
+                        if (Gpo_AvionesAliados.getTotalUsed() <= 1) {
+                            tableroBase.setText([
+                                'DATOS BASE:',
+                                'Vida de Torre: ' + torreControlAliada.vida + '%',
+                                'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                                'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
+                                'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
+                            ]);
+                            tableroBaseCuidado.visible = true;
+                            tableroBaseCuidado.setText([
+                                'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
+                            ]);
+                        } else {
+                            tableroBase.setText([
+                                'DATOS BASE:',
+                                'Vida de Torre: ' + torreControlAliada.vida + '%',
+                                'Vida de Dep. Combustible: ' + deposito_combustibleAliado.vida + '%',
+                                'Vida de Dep. Bombas: ' + deposito_bombasAliado.vida + '%',
+                                'Cant. Artilleros: ' + Gpo_ArtillerosAliados.getTotalUsed(),
+                                'Cant. Aviones: ' + Gpo_AvionesAliados.getTotalUsed(),
+                            ]);
+                            tableroBaseCuidado.visible = false;
+                        }
                     } else { //perdio el otro
                         tableroAvionCuidado.visible = false;
                         tableroEstadoPartida.visible=true;
                         //tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#FFFFFF' });
+                        tableroEstadoPartida.x = 380;
                         tableroEstadoPartida.setText([
                             '¡¡¡GANASTE!!',
                         ]);
@@ -1938,13 +2004,13 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     mostrarAlert = false;
                     spotlight.x = pistaAvionesAliada.x;
                     spotlight.y = pistaAvionesAliada.y;
-                    alert("alguien perdio!!");
+                    //alert("alguien perdio!!");
                 }
                 
             }////cierre isContinuarUpdate
         }
         
-        moveSuper();
+        actSuper();
 
     }////CIERRE UPDATE
     /////////////////---------------------------------------------------------------------------------------
@@ -2090,27 +2156,32 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 break;
             case Phaser.Input.Keyboard.KeyCodes.P:
                 isPressY5Times = 0;
-                ////console.log("Yo Soy::"+jugadorMiNumero);
-                ////console.log("Juego en Pausa?::"+isJuegoEnPausa);
-                ////Paausar juego y mostrar tablero de opcion para rendirse y salir; o guardar    
-                if ((quienPidioPausa == 0) || (quienPidioPausa==jugadorMiNumero)){
-                    if (isJuegoEnPausa == false) {
-                        isJuegoEnPausa = true;
-                        quienPidioPausa=jugadorMiNumero;
-                        sendDatosWebSocket("juegoPausar");
-						tableroEstadoPartida.visible=true;
-                        juegoPausar();
-                        //////////////////////aca va mostrarMenu();
-                        /////console.log("Quien pidio pausa::"+quienPidioPausa);
-                    } else {
-                        isJuegoEnPausa = false;
-                        sendDatosWebSocket("juegoReanudar");
-                        tableroEstadoPartida.visible=false;
-                        juegoReanudar();
+
+                isContinuarUpdate = validarCondicionesPartidaAliada();
+                if (isContinuarUpdate) {
+
+                    ////console.log("Yo Soy::"+jugadorMiNumero);
+                    ////console.log("Juego en Pausa?::"+isJuegoEnPausa);
+                    ////Paausar juego y mostrar tablero de opcion para rendirse y salir; o guardar    
+                    if ((quienPidioPausa == 0) || (quienPidioPausa==jugadorMiNumero)){
+                        if (isJuegoEnPausa == false) {
+                            modal.style.display = "block";
+                            isJuegoEnPausa = true;
+                            quienPidioPausa=jugadorMiNumero;
+                            sendDatosWebSocket("juegoPausar");
+                            tableroEstadoPartida.visible=true;
+                            juegoPausar();
+                            //////////////////////aca va mostrarMenu();
+                            /////console.log("Quien pidio pausa::"+quienPidioPausa);
+                        } else {
+                            isJuegoEnPausa = false;
+                            sendDatosWebSocket("juegoReanudar");
+                            tableroEstadoPartida.visible=false;
+                            juegoReanudar();
+                        }
+                    ////console.log("Actual Jugador que Pauso::"+quienPidioPausa);
                     }
-                ////console.log("Actual Jugador que Pauso::"+quienPidioPausa);
                 }
-              
                 break;
             case Phaser.Input.Keyboard.KeyCodes.Y:
                 isPressY5Times = isPressY5Times+1;
@@ -2496,16 +2567,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
             });
             newArtillero.bullets_artillero_Enemigo.physicsBodyType = Phaser.Physics.ARCADE;
             
-            
-
-
-            artilleroSetearUbicacion(newArtillero);  /////////////////ELIMINAR ESTO
-        
-        
-        
-        
-        
-        
+            ////artilleroSetearUbicacion(newArtillero);  /////////////////ELIMINAR ESTO
         
         }
         newArtillero.setCollideWorldBounds(true);
@@ -2986,24 +3048,24 @@ export default class s7_campoBatalla extends Phaser.Scene {
             avion.cantCombustible = avion.cantCombustible - avion.unidadDeConsumoCombustible;
         } else {
             ////EVENTO DE DESTRUCCION/caida POR FALTA DE COMBUSTIBLE
-            hayCombutible(avion);  
+            hayCombustible(avion);  
         }
     }
 
     function getunidadDeConsumoCombustible(num, avion){
         avion.unidadDeConsumoCombustible = num;
         if (avion.tieneBomba) {
-            avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num ;
+            avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible*2 ;
         }
         if(avion.z > 100){ ///altura maxima
-            avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num;
+            avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible*2; 
         }
         if (modificoDireccion) {
             avion.unidadDeConsumoCombustible = avion.unidadDeConsumoCombustible + num;
         }
     }
 
-    function hayCombutible(avion){
+    function hayCombustible(avion){
         if ( (avion.cantCombustible <= 0) ){ // && isAvionActivaAliadaViva){
             ////CAMBIAR FLAG PARA QUE LA SOMBRA QUEDE EN LA BASE
             isAvionActivaAliadaViva = false;
@@ -3086,7 +3148,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
                 callbackScope: bombaBulletE,tweenBombaE,
                 loop: true,
             });
-            //in_AvionOrigen.tieneBomba=false; ////--> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
+            in_AvionOrigen.tieneBomba=false; ////--> ACTIVAR PARA QUE SOLO DISPARE UNA BOMBA!!!
         }
     }
 
@@ -3094,7 +3156,7 @@ export default class s7_campoBatalla extends Phaser.Scene {
 
 
     function setMaksAvion(in_avion){
-        if (isEnSuTerritorio(in_avion)) {
+        if (isEnSuTerritorio(in_avion)  && cantSuper==0) {
             in_avion.mask = spotlight_instance;
         } else {
             in_avion.mask = 0;
@@ -3139,15 +3201,31 @@ export default class s7_campoBatalla extends Phaser.Scene {
             superOne.visible=true;
             superOne.body.enable=true;
             superOne.unidadDeVelocidad=15; 
+
+            isSuperAlive = true;
+            cantSuper=1;
+
+            avionEnemiga_Activa.mask = 0;
+            avionEnemiga_Activa.mask = 0;
+            sceneJuego.pisoEnemigo.mask = 0;
+            artilleroE_1.mask = 0;
+            artilleroE_2.mask = 0;
+            artilleroE_3.mask = 0;
+            artilleroE_4.mask = 0;
+            artilleroE_5.mask = 0;
+            artilleroE_6.mask = 0;
+            torreControlEnemiga.mask = 0;
+            pistaAvionesEnemiga.mask = 0;
+            deposito_bombasEnemigo.mask = 0;
+            deposito_combustibleEnemigo.mask = 0;
+
         }
 
     }
     
-    function moveSuper(){
+    function actSuper(){
         if( (sceneJuego.superBorn.isDown) && (cantSuper==0) ) {
             createSuper();
-            isSuperAlive = true;
-            cantSuper=1;
         }
 
         if (isSuperAlive == true) {
@@ -3193,16 +3271,30 @@ export default class s7_campoBatalla extends Phaser.Scene {
                     superOne.body.enable= false;
                     isSuperAlive = false;
                     cantSuper=0;
+
                     spotlight.x = pistaAvionesAliada.x;
                     spotlight.y = pistaAvionesAliada.y;
+
+                    setMaksAvion(avionEnemiga_Activa);
+                    sceneJuego.pisoEnemigo.mask = spotlight_instance;
+                    avionEnemiga_Activa.mask = spotlight_instance;
+                    artilleroE_1.mask = spotlight_instance;
+                    artilleroE_2.mask = spotlight_instance;
+                    artilleroE_3.mask = spotlight_instance;
+                    artilleroE_4.mask = spotlight_instance;
+                    artilleroE_5.mask = spotlight_instance;
+                    artilleroE_6.mask = spotlight_instance;
+                    torreControlEnemiga.mask = spotlight_instance;
+                    pistaAvionesEnemiga.mask = spotlight_instance;
+                    deposito_bombasEnemigo.mask = spotlight_instance;
+                    deposito_combustibleEnemigo.mask = spotlight_instance;
+
+
                 }
             } ////FIN IF DE BOTONES DE DIRECCION
-        }
-        if (isSuperAlive) {
             spotlight.x = superOne.x;
             spotlight.y = superOne.y+2;
         }
-        
     }
 
     function setRecargarElementosAvion(in_Avion_Activa){
@@ -3691,6 +3783,7 @@ function juegoPausar(){
 
     isJuegoEnPausa = true;
     //tableroAvion = this.add.text(380, 280, 'Move the mouse', { font: '36px Courier Bold', fill: '#F11FFF' });
+    tableroEstadoPartida.x = 330;
     tableroEstadoPartida.setText([
         'PARTIDA PAUSADA',
     ]); 
